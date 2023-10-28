@@ -5,16 +5,6 @@ const Layout = () => {
   return (
     <Tabs>
       <Tabs.Screen
-        name="products"
-        options={{
-          title: "Products",
-          tabBarLabel: "Products",
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="package-variant-closed" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="warehouse"
         options={{
           title: "Warehouses",
@@ -41,6 +31,16 @@ const Layout = () => {
           tabBarLabel: "Refillers",
           tabBarIcon: ({ color, size }) => (
             <Icon name="account-multiple-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="products"
+        options={{
+          title: "Products",
+          tabBarLabel: "Products",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="package-variant-closed" color={color} size={size} />
           ),
         }}
       />

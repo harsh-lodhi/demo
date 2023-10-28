@@ -1,13 +1,5 @@
 import { Alert, FlatList, StyleSheet, View } from "react-native";
-import {
-  Button,
-  Chip,
-  FAB,
-  IconButton,
-  List,
-  Menu,
-  Text,
-} from "react-native-paper";
+import { Button, Chip, FAB, List, Menu, Text } from "react-native-paper";
 import {
   ProductItemType,
   VendingMachineItemType,
@@ -25,6 +17,7 @@ import { db, serverTimestamp } from "../../utils/firebase";
 import * as Device from "expo-device";
 import ProductPicker from "../admin/(aux)/ProductPicker";
 import { useUser } from "../../hooks/useUserInfo";
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 const IndexScreen = () => {
   const [user] = useUser();
@@ -93,6 +86,14 @@ const IndexScreen = () => {
       [...(dataTrayProducts || []), ...newProducts].map(
         (item) => `${item.product_id}`
       ) ?? []
+    );
+  }, [dataTrayProducts, newProducts]);
+
+  const filteredProducts = useMemo(() => {
+    return (
+      [...(dataTrayProducts || []), ...newProducts].sort((a, b) => {
+        return a.product_name.localeCompare(b.product_name);
+      }) ?? []
     );
   }, [dataTrayProducts, newProducts]);
 
@@ -302,7 +303,7 @@ const IndexScreen = () => {
       </View>
 
       <FlatList
-        data={[...(dataTrayProducts || []), ...newProducts]}
+        data={filteredProducts}
         keyExtractor={(item) => `${item.product_id}`}
         renderItem={({ item }) => {
           const qty = getProductQuantity(item);
@@ -317,31 +318,39 @@ const IndexScreen = () => {
                   : `Left: ${item.left_units} / Total: ${item.total_units}`
               }
               left={(props) => (
-                <IconButton
+                <Icon
                   {...props}
-                  icon={
+                  name={
                     isChecked
                       ? "checkbox-marked-circle-outline"
                       : "checkbox-blank-circle-outline"
                   }
-                  iconColor={
+                  color={
                     isChecked ? "green" : props.color ?? "rgba(0, 0, 0, 0.54)"
                   }
-                  onPress={() => handleToggleCheckedProduct(item.product_id)}
+                  size={24}
                 />
               )}
               right={(props) => (
                 <Button
                   style={props.style}
                   onPress={() => setSelectedProduct(item)}
-                  icon="pencil-outline"
+                  // icon="pencil-outline"
                   compact
                 >
-                  {qty}
+                  <Text
+                    variant="headlineSmall"
+                    style={{
+                      color: "#0bbf64",
+                    }}
+                  >
+                    {qty}
+                  </Text>
                 </Button>
               )}
               // onPress={() => setSelectedProduct(item)}
               onLongPress={() => emptyProduct(item)}
+              onPress={() => handleToggleCheckedProduct(item.product_id)}
             />
           );
         }}
@@ -382,7 +391,7 @@ const IndexScreen = () => {
         <Button
           mode="contained"
           icon="check"
-          disabled={!selectedWareHouse}
+          disabled={!selectedWareHouse || !filteredProducts.length}
           onPress={handleSubmit}
           loading={submitting}
         >

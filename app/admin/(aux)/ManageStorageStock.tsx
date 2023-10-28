@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Storage } from "../../../types/common";
 import { FlatList, Modal, StyleSheet, View } from "react-native";
 import {
@@ -32,7 +32,7 @@ interface StorageProductsFormProps {
   storageName: Storage;
 }
 
-const ManageStorageStock: React.FC<StorageProductsFormProps> = ({
+const ManageStorageStock: FC<StorageProductsFormProps> = ({
   id,
   storageName,
 }) => {
@@ -46,6 +46,8 @@ const ManageStorageStock: React.FC<StorageProductsFormProps> = ({
       }
     | undefined
   >();
+
+  const [savingProduct, setSavingProduct] = useState(false);
 
   useEffect(() => {
     const unsubs = db
@@ -78,6 +80,14 @@ const ManageStorageStock: React.FC<StorageProductsFormProps> = ({
     return allProductsObj[selectedProduct.id];
   }, [allProductsObj, selectedProduct]);
 
+  const totalValue = useMemo(() => {
+    return products.reduce((acc, cur) => {
+      return (
+        acc + cur.quantity * allProductsObj[cur.product_ref.id].product_price
+      );
+    }, 0);
+  }, [products, allProductsObj]);
+
   const handleSelectProduct = useCallback((product_id: string) => {
     setSelectedProduct({
       id: product_id,
@@ -88,6 +98,7 @@ const ManageStorageStock: React.FC<StorageProductsFormProps> = ({
 
   const handleAddProduct = useCallback(async () => {
     if (!selectedProduct) return;
+    setSavingProduct(true);
     await db
       .collection(`${storageName}/${id}/products`)
       .doc(selectedProduct.id)
@@ -96,11 +107,23 @@ const ManageStorageStock: React.FC<StorageProductsFormProps> = ({
         quantity: parseInt(selectedProduct.quantity),
       });
     setSelectedProduct(undefined);
+    setSavingProduct(false);
   }, [selectedProduct, storageName]);
 
   return (
     <>
-      <List.Subheader>{storageName}</List.Subheader>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingRight: 16,
+        }}
+      >
+        <List.Subheader>{storageName}</List.Subheader>
+        <Text variant="labelLarge">Total: {formatPrice(totalValue)}</Text>
+      </View>
+
       <FlatList
         data={products}
         renderItem={({ item }) => {
@@ -119,8 +142,15 @@ const ManageStorageStock: React.FC<StorageProductsFormProps> = ({
               }}
               right={() => {
                 return (
-                  <View>
+                  <View
+                    style={{
+                      gap: 8,
+                      justifyContent: "flex-end",
+                      alignItems: "flex-end",
+                    }}
+                  >
                     <Chip compact>{item.quantity}</Chip>
+                    <Text>{formatPrice(item.quantity * _p.product_price)}</Text>
                   </View>
                 );
               }}
@@ -166,13 +196,6 @@ const ManageStorageStock: React.FC<StorageProductsFormProps> = ({
             }}
           />
           <Appbar.Content title="Select product" />
-
-          {/* <SearchBar
-            placeholder="Search"
-            onChangeText={(text) => {
-              console.log(text);
-            }}
-          /> */}
         </Appbar.Header>
 
         <FlatList
@@ -227,15 +250,23 @@ const ManageStorageStock: React.FC<StorageProductsFormProps> = ({
                   };
                 });
               }}
+              disabled={savingProduct}
             />
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={handleAddProduct}>Save</Button>
+            <Button
+              onPress={handleAddProduct}
+              loading={savingProduct}
+              disabled={savingProduct}
+            >
+              Save
+            </Button>
 
             <Button
               onPress={() => {
                 setSelectedProduct(undefined);
               }}
+              disabled={savingProduct}
             >
               Cancel
             </Button>

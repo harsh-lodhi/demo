@@ -1,6 +1,12 @@
-import { FC, useMemo } from "react";
-import { FlatList, Modal } from "react-native";
-import { Appbar, Divider, IconButton, List } from "react-native-paper";
+import { FC, useEffect, useMemo, useState } from "react";
+import { BackHandler, FlatList, Modal } from "react-native";
+import {
+  Appbar,
+  Divider,
+  IconButton,
+  List,
+  TextInput,
+} from "react-native-paper";
 import { useProductsState } from "../../../hooks/appState";
 import { DEFAULT_PRODUCT_IMAGE } from "../../../constants";
 import { formatPrice } from "../../../utils/currency";
@@ -20,18 +26,67 @@ const ProductPicker: FC<ProductPickerProps> = ({
   onSelectProduct,
 }) => {
   const [allProducts] = useProductsState();
+  const [searchText, setSearchText] = useState("");
+  const [searchVisible, setSearchVisible] = useState(false);
 
   const filteredProducts = useMemo(() => {
-    return allProducts.filter((product) => {
-      return !disabledItems.includes(product.product_id);
+    let products = allProducts;
+
+    if (searchText) {
+      products = products.filter((product) => {
+        return product.product_name
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
+      });
+    }
+
+    return products
+      .filter((product) => {
+        return !disabledItems.includes(product.product_id.toString());
+      })
+      .sort((a, b) => {
+        return a.product_name.localeCompare(b.product_name);
+      });
+  }, [allProducts, disabledItems, searchText]);
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", () => {
+      if (searchVisible) {
+        setSearchVisible(false);
+        return true;
+      }
+
+      return false;
     });
-  }, [allProducts, disabledItems]);
+  }, [searchVisible]);
 
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={onDismiss}>
       <Appbar.Header style={{ elevation: 4 }}>
-        <IconButton icon="close" onPress={onDismiss} />
-        <Appbar.Content title="Select product" />
+        {searchVisible ? (
+          <>
+            <TextInput
+              autoFocus
+              style={{ flex: 1 }}
+              placeholder="Search product"
+              value={searchText}
+              onChangeText={setSearchText}
+              dense
+            />
+          </>
+        ) : (
+          <>
+            <IconButton icon="close" onPress={onDismiss} />
+            <Appbar.Content title="Select product" />
+          </>
+        )}
+
+        <IconButton
+          icon={searchVisible ? "close" : "magnify"}
+          onPress={() => {
+            setSearchVisible((prev) => !prev);
+          }}
+        />
       </Appbar.Header>
 
       <FlatList
