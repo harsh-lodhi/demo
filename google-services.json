@@ -12,7 +12,20 @@
           "package_name": "com.hamidraza.ggapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "48500871705-vppqu37j41drhm3jfbd74p78rrfaggeb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hamidraza.ggapp",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "48500871705-bjqg5jtgiaj3128oimcd3vjpjvlqke5r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyASmL8PO3PRH4JRTLLLPqbwWKst1Nsft4o"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "48500871705-bjqg5jtgiaj3128oimcd3vjpjvlqke5r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "48500871705-4qlcudkeiq5ge7fcp41m5q57r6aj1b2m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hamidraza.ggapp"
+              }
+            }
+          ]
         }
       }
     }

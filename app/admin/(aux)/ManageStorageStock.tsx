@@ -18,7 +18,6 @@ import { ProductItemType } from "../../../atoms/app";
 import { db } from "../../../utils/firebase";
 import { useProductsState } from "../../../hooks/appState";
 import { formatPrice } from "../../../utils/currency";
-import { SearchBar } from "react-native-screens";
 import { listToDocsObj } from "../../../utils/common";
 import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
 import { DEFAULT_PRODUCT_IMAGE } from "../../../constants";
@@ -168,12 +167,12 @@ const ManageStorageStock: React.FC<StorageProductsFormProps> = ({
           />
           <Appbar.Content title="Select product" />
 
-          <SearchBar
+          {/* <SearchBar
             placeholder="Search"
             onChangeText={(text) => {
               console.log(text);
             }}
-          />
+          /> */}
         </Appbar.Header>
 
         <FlatList

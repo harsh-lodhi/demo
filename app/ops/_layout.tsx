@@ -3,7 +3,11 @@ import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 const OpsLayout = () => {
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarHideOnKeyboard: true,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{

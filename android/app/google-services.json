@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "48500871705",
+    "project_id": "go-grab-13dac",
+    "storage_bucket": "go-grab-13dac.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:48500871705:android:bfc56774778b0c681d1088",
+        "android_client_info": {
+          "package_name": "com.hamidraza.ggapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASmL8PO3PRH4JRTLLLPqbwWKst1Nsft4o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

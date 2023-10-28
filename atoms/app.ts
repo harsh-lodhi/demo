@@ -58,8 +58,8 @@ export interface VendingMachineItemType extends DocType {
   org_name: string;
   profile_percent: number;
   sdcard_serial_number: string;
-  left_units: string;
-  total_units: string;
+  left_units: number;
+  total_units: number;
   total_price: number;
 }
 
