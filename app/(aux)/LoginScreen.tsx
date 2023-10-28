@@ -74,7 +74,7 @@ const LoginScreen = () => {
         );
       } else {
         // some other error happened
-        Alert.alert("Unknown error", "An unknown error has occured");
+        Alert.alert("[signIn] Unknown error", error.toString());
       }
     } finally {
       setSignInInProgress(false);

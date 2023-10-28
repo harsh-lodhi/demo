@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "48500871705-jjk7d2p35tucnp9faohcq2laj4vttnj2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hamidraza.ggapp",
+            "certificate_hash": "23be15a523f74b3c5888d577b615be6d0ce7ae99"
+          }
+        },
+        {
           "client_id": "48500871705-vppqu37j41drhm3jfbd74p78rrfaggeb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
