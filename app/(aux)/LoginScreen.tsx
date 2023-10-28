@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, View } from "react-native";
-import { ActivityIndicator } from "react-native-paper";
+import { ActivityIndicator, Text } from "react-native-paper";
 import {
   GoogleSignin,
   GoogleSigninButton,
@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { auth } from "../../utils/firebase";
 import fbAuth from "@react-native-firebase/auth";
+import * as Application from "expo-application";
 
 const LoginScreen = () => {
   const [userInfo, setUserInfo] = useState<User | null>(null);
@@ -83,6 +84,7 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={{ flex: 1 }} />
       {signInInProgress ? <ActivityIndicator /> : null}
       <GoogleSigninButton
         size={GoogleSigninButton.Size.Standard}
@@ -90,6 +92,16 @@ const LoginScreen = () => {
         onPress={signIn}
         disabled={signInInProgress}
       />
+      <View style={{ flex: 1 }} />
+      <View style={{ marginVertical: 16 }}>
+        <Text
+          variant="labelSmall"
+          style={{ textAlign: "center", color: "#ccc" }}
+        >
+          Version: {Application.nativeApplicationVersion}-
+          {Application.nativeBuildVersion}
+        </Text>
+      </View>
     </View>
   );
 };

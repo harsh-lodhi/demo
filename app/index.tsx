@@ -1,17 +1,16 @@
 import { View } from "react-native";
-import { Divider, List } from "react-native-paper";
+import { Divider, List, Text } from "react-native-paper";
 import { router } from "expo-router";
-import { useState } from "react";
 import { useUser } from "../hooks/useUserInfo";
+import * as Application from "expo-application";
 
 const admins = ["hasis.raj@gmail.com", "akanshmathur1807@gmail.com"];
 
 const Home = () => {
-  const [id, setId] = useState(0);
   const [user] = useUser();
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <List.Section>
         <List.Subheader>Navigation</List.Subheader>
 
@@ -36,6 +35,16 @@ const Home = () => {
           </>
         )}
       </List.Section>
+      <View style={{ flex: 1 }} />
+      <View style={{ marginVertical: 16 }}>
+        <Text
+          variant="labelSmall"
+          style={{ textAlign: "center", color: "#ccc" }}
+        >
+          Version: {Application.nativeApplicationVersion}-
+          {Application.nativeBuildVersion}
+        </Text>
+      </View>
     </View>
   );
 };

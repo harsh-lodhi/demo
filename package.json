@@ -23,6 +23,7 @@
     "@react-native-google-signin/google-signin": "^10.1.0",
     "axios": "^1.5.1",
     "expo": "~49.0.13",
+    "expo-application": "~5.3.0",
     "expo-constants": "~14.4.2",
     "expo-dev-client": "~2.4.11",
     "expo-device": "~5.4.0",
