@@ -16,10 +16,14 @@ const AppLayout = () => {
     try {
       await GoogleSignin.signOut();
       await auth.signOut();
-      setUser(null);
     } catch (error) {
       console.error("[EEEEEE]", error);
     }
+
+    // HACK: `onAuthStateChanged` is not handling the sign out event properly
+    setTimeout(() => {
+      setUser(null);
+    }, 200);
   };
 
   return (

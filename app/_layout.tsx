@@ -12,11 +12,8 @@ const Layout = () => {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useUser();
 
-  // Handle user state changes
-  function onAuthStateChanged(user: FirebaseAuthTypes.User | null) {
-    if (user) {
-      setUser(user);
-    }
+  function onAuthStateChanged(_user: FirebaseAuthTypes.User | null) {
+    setUser(_user);
     if (initializing) setInitializing(false);
   }
 
@@ -32,12 +29,13 @@ const Layout = () => {
     });
   }, []);
 
-  if (initializing)
+  if (initializing) {
     return (
       <View style={styles.stateContainer}>
         <ActivityIndicator />
       </View>
     );
+  }
 
   return user ? <AppLayout /> : <LoginScreen />;
 };
