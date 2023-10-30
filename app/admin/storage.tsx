@@ -13,7 +13,10 @@ interface StorageInfoProps {
   id: string;
 }
 
-const StorageInfo: React.FC<StorageInfoProps> = ({ storageName, id }) => {
+export const StorageInfo: React.FC<StorageInfoProps> = ({
+  storageName,
+  id,
+}) => {
   if (storageName == Storage.VENDING_MACHINE) {
     return <VendingMachineInfo id={id} />;
   }

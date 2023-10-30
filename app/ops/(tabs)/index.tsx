@@ -4,19 +4,19 @@ import {
   ProductItemType,
   VendingMachineItemType,
   WarehouseItemType,
-} from "../../atoms/app";
+} from "../../../atoms/app";
 import { useCallback, useMemo, useState } from "react";
-import MachinePickerModal from "../../components/MachinePickerModal";
+import MachinePickerModal from "../../../components/MachinePickerModal";
 import { useQuery } from "react-query";
-import { wenderApi } from "../../api";
-import { useWarehousesState } from "../../hooks/appState";
+import { wenderApi } from "../../../api";
+import { useWarehousesState } from "../../../hooks/appState";
 import ProductQuantityDialog, {
   ProductItem,
-} from "../(aux)/picker/ProductQuantityDialog";
-import { db, serverTimestamp } from "../../utils/firebase";
+} from "../../(aux)/picker/ProductQuantityDialog";
+import { db, serverTimestamp } from "../../../utils/firebase";
 import * as Device from "expo-device";
-import ProductPicker from "../admin/(aux)/ProductPicker";
-import { useUser } from "../../hooks/useUserInfo";
+import ProductPicker from "../../admin/(aux)/ProductPicker";
+import { useUser } from "../../../hooks/useUserInfo";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 const IndexScreen = () => {

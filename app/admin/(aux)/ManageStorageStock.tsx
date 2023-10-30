@@ -30,11 +30,13 @@ interface _ProductType {
 interface StorageProductsFormProps {
   id: string;
   storageName: Storage;
+  ops?: boolean;
 }
 
 const ManageStorageStock: FC<StorageProductsFormProps> = ({
   id,
   storageName,
+  ops = false,
 }) => {
   const [allProducts] = useProductsState();
   const [products, setProducts] = useState<_ProductType[]>([]);
@@ -57,7 +59,7 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
         snapshot.forEach((doc) => {
           products.push(doc.data() as _ProductType);
         });
-        setProducts(products);
+        setProducts(products.sort((a, b) => b.quantity - a.quantity));
       });
 
     return () => {
@@ -121,7 +123,9 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
         }}
       >
         <List.Subheader>{storageName}</List.Subheader>
-        <Text variant="labelLarge">Total: {formatPrice(totalValue)}</Text>
+        {!ops && (
+          <Text variant="labelLarge">Total: {formatPrice(totalValue)}</Text>
+        )}
       </View>
 
       <FlatList
@@ -150,16 +154,24 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
                     }}
                   >
                     <Chip compact>{item.quantity}</Chip>
-                    <Text>{formatPrice(item.quantity * _p.product_price)}</Text>
+                    {!ops && (
+                      <Text>
+                        {formatPrice(item.quantity * _p.product_price)}
+                      </Text>
+                    )}
                   </View>
                 );
               }}
-              onPress={() => {
-                setSelectedProduct({
-                  id: item.product_ref.id,
-                  quantity: `${item.quantity}`,
-                });
-              }}
+              onPress={
+                ops
+                  ? undefined
+                  : () => {
+                      setSelectedProduct({
+                        id: item.product_ref.id,
+                        quantity: `${item.quantity}`,
+                      });
+                    }
+              }
             />
           );
         }}
@@ -173,13 +185,15 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
         }}
       />
 
-      <FAB
-        style={styles.fab}
-        onPress={() => {
-          setModalVisible(true);
-        }}
-        icon="plus"
-      />
+      {!ops && (
+        <FAB
+          style={styles.fab}
+          onPress={() => {
+            setModalVisible(true);
+          }}
+          icon="plus"
+        />
+      )}
 
       <Modal
         animationType="slide"

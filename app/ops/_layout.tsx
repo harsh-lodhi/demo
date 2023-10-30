@@ -1,34 +1,22 @@
-import { Tabs } from "expo-router";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { Stack } from "expo-router";
 
 const OpsLayout = () => {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarHideOnKeyboard: true,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
+    <Stack>
+      <Stack.Screen
+        name="(tabs)"
         options={{
-          title: "Pick items",
-          tabBarLabel: "Pick",
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="hand-okay" color={color} size={size} />
-          ),
+          headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="refill"
+      <Stack.Screen
+        name="ops-storage"
         options={{
-          title: "Refill",
-          tabBarLabel: "Refill",
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="fridge-outline" color={color} size={size} />
-          ),
+          title: "Storage stock",
+          presentation: "modal",
         }}
       />
-    </Tabs>
+    </Stack>
   );
 };
 
