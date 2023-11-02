@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Alert, FlatList } from "react-native";
+import { Alert, FlatList, View } from "react-native";
 import { Divider, List, Text } from "react-native-paper";
 import { wenderApi } from "../../../api";
 import { useQuery } from "react-query";
@@ -11,6 +11,7 @@ import {
   updateProductQuantity,
 } from "../../../utils/firebase";
 import Loader from "../../../components/Loader/Loader";
+import { format } from "date-fns";
 
 function addDaysToDate(days: number, date = new Date()) {
   const result = new Date(date);
@@ -31,13 +32,17 @@ const RefillScreen = () => {
   const [user] = useUser();
   const [saving, setSaving] = useState(false);
 
-  const { data, isLoading, refetch } = useQuery({
+  const {
+    data = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["refill-history"],
     queryFn: async () => {
       const res = await wenderApi.post("/liveStatusRefill/getRefillHistory", {
         start_date: addDaysToDate(-1).toISOString().split("T")[0],
         end_date: new Date().toISOString().split("T")[0],
-        limit: 5,
+        limit: 100,
         offset: 0,
         machine_ids: [],
       });
@@ -46,13 +51,17 @@ const RefillScreen = () => {
   });
 
   const filteredData = useMemo(() => {
-    if (!data) return [];
-
-    if (user?.claims?.role === "admin") {
-      return data;
+    let result = data;
+    if (user?.claims?.role !== "admin") {
+      result = data.filter(
+        (item) => item.refiller_id === user?.claims?.wenderId
+      );
     }
 
-    return data.filter((item) => item.refiller_id === user?.claims?.wenderId);
+    return result.map((item) => ({
+      ...item,
+      created_at: new Date(item.created_at),
+    }));
   }, [data]);
 
   const confirmSubmit = useCallback(
@@ -114,7 +123,26 @@ const RefillScreen = () => {
         renderItem={({ item }) => (
           <List.Item
             title={item.refiller_name}
-            description={item.created_at}
+            description={format(
+              new Date(item.created_at),
+              "dd-MMM-yyyy hh:mm a"
+            )}
+            left={(props) => (
+              <View
+                {...props}
+                style={[
+                  props.style,
+                  {
+                    backgroundColor: "#ddd",
+                    paddingVertical: 8,
+                    paddingHorizontal: 16,
+                    borderRadius: 8,
+                  },
+                ]}
+              >
+                <Text>{item.machine_id}</Text>
+              </View>
+            )}
             onPress={() => setSelectedRefillId(item.refill_id)}
           />
         )}
@@ -122,18 +150,28 @@ const RefillScreen = () => {
         refreshing={isLoading}
         onRefresh={refetch}
         ItemSeparatorComponent={() => <Divider />}
-        ListHeaderComponent={() =>
-          filteredData.length > 0 ? (
+        ListHeaderComponent={() => {
+          return filteredData.length > 0 ? (
             <Text variant="labelLarge" style={{ padding: 16 }}>
               Confirm your refills
             </Text>
-          ) : undefined
-        }
-        ListEmptyComponent={() =>
-          isLoading ? null : (
+          ) : undefined;
+        }}
+        ListEmptyComponent={() => {
+          return isLoading ? null : (
             <Text style={{ padding: 16 }}>No refills found</Text>
-          )
-        }
+          );
+        }}
+        ListFooterComponent={() => {
+          return isLoading ? null : (
+            <Text
+              style={{ padding: 16, textAlign: "center" }}
+              variant="labelSmall"
+            >
+              {filteredData.length} refills found
+            </Text>
+          );
+        }}
       />
 
       <RefillProductsModal

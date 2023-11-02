@@ -71,7 +71,6 @@ const ProductPicker: FC<ProductPickerProps> = ({
               placeholder="Search product"
               value={searchText}
               onChangeText={setSearchText}
-              dense
             />
           </>
         ) : (

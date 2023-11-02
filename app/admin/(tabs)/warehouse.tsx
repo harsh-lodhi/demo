@@ -54,6 +54,7 @@ const WarehouseScreen = () => {
       pathname: "/admin/storage",
       params: {
         storageName: Storage.WAREHOUSE,
+        storageLabel: item.name,
         id: item._docID,
       },
     });

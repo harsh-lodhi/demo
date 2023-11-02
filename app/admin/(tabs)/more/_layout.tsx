@@ -6,7 +6,7 @@ const MoreLayout = () => {
       <Stack.Screen
         name="settings"
         options={{
-          title: "Settings",
+          title: "More",
         }}
       />
       <Stack.Screen
