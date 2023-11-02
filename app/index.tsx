@@ -4,8 +4,6 @@ import { router } from "expo-router";
 import { useUser } from "../hooks/useUserInfo";
 import * as Application from "expo-application";
 
-const admins = ["hasis.raj@gmail.com", "akanshmathur1807@gmail.com"];
-
 const Home = () => {
   const [user] = useUser();
 
@@ -22,14 +20,12 @@ const Home = () => {
           right={() => <List.Icon icon="chevron-right" />}
         />
 
-        {admins.includes(user?.email || "") && (
+        {user?.claims?.role == "admin" && (
           <>
             <Divider />
             <List.Item
               title="Admin"
-              onPress={() => {
-                router.push("/admin");
-              }}
+              onPress={() => router.push("/admin")}
               right={() => <List.Icon icon="chevron-right" />}
             />
           </>

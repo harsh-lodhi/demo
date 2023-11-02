@@ -1,12 +1,14 @@
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { atom } from "recoil";
 
-export const userState = atom<FirebaseAuthTypes.User | null>({
-  key: "userState",
-  default: null,
-});
+interface UserType extends FirebaseAuthTypes.User {
+  claims?: {
+    wenderId?: string;
+    role?: "admin";
+  };
+}
 
-export const userCredential = atom<FirebaseAuthTypes.UserCredential | null>({
-  key: "userCredential",
+export const userState = atom<UserType | null>({
+  key: "userState",
   default: null,
 });

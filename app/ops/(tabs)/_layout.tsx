@@ -3,11 +3,7 @@ import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 const OpsLayout = () => {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarHideOnKeyboard: true,
-      }}
-    >
+    <Tabs screenOptions={{ tabBarHideOnKeyboard: true }}>
       <Tabs.Screen
         name="index"
         options={{
@@ -15,6 +11,16 @@ const OpsLayout = () => {
           tabBarLabel: "Pick",
           tabBarIcon: ({ color, size }) => (
             <Icon name="hand-okay" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="my-bag"
+        options={{
+          title: "My Bag",
+          tabBarLabel: "My Bag",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="bag-personal" color={color} size={size} />
           ),
         }}
       />
@@ -34,7 +40,7 @@ const OpsLayout = () => {
           title: "Report",
           tabBarLabel: "Report",
           tabBarIcon: ({ color, size }) => (
-            <Icon name="abjad-arabic" color={color} size={size} />
+            <Icon name="alert-rhombus" color={color} size={size} />
           ),
         }}
       />

@@ -13,7 +13,11 @@ import { useWarehousesState } from "../../../hooks/appState";
 import ProductQuantityDialog, {
   ProductItem,
 } from "../../(aux)/picker/ProductQuantityDialog";
-import { db, serverTimestamp } from "../../../utils/firebase";
+import {
+  db,
+  serverTimestamp,
+  updateProductQuantity,
+} from "../../../utils/firebase";
 import * as Device from "expo-device";
 import ProductPicker from "../../admin/(aux)/ProductPicker";
 import { useUser } from "../../../hooks/useUserInfo";
@@ -123,44 +127,75 @@ const IndexScreen = () => {
     setSelectedProduct(undefined);
   }, []);
 
-  const handleConfirmSubmit = useCallback(() => {
-    const result: Record<string, number> = {};
+  const handleConfirmSubmit = useCallback(async () => {
+    const products: Record<string, number> = {};
 
     dataTrayProducts?.forEach((item) => {
-      result[item.product_id] = getProductQuantity(item);
+      const qty = getProductQuantity(item);
+      if (qty != 0) {
+        products[item.product_id] = qty;
+      }
     });
 
     setSubmitting(true);
-    db.collection("picklog")
-      .add({
-        products: result,
-        warehouse: selectedWareHouse?._docID,
-        createdByDevice: {
-          deviceName: Device.deviceName,
-          deviceYearClass: Device.deviceYearClass,
-          isDevice: Device.isDevice,
-          modelName: Device.modelName,
-          brand: Device.brand,
-          manufacturer: Device.manufacturer,
-          osName: Device.osName,
-          osVersion: Device.osVersion,
-          platformApiLevel: Device.platformApiLevel,
-          supportedCpuArchitectures: Device.supportedCpuArchitectures,
-          totalMemory: Device.totalMemory,
-        },
-        createdAt: serverTimestamp(),
-        createdBy: user?.uid,
-      })
-      .then(() => {
-        console.log("Document successfully written!");
-        setSelectedMachines([]);
-        setSelectedWareHouse(undefined);
-        setProductsQuantity({});
-      })
-      .catch((error) => {
-        console.error("Error writing document: ", error);
-      })
-      .finally(() => setSubmitting(false));
+
+    const batch = db.batch();
+    const pickLogRef = db.collection("picklog").doc();
+
+    batch.set(pickLogRef, {
+      products,
+      warehouse: selectedWareHouse?._docID,
+      createdByDevice: {
+        deviceName: Device.deviceName,
+        deviceYearClass: Device.deviceYearClass,
+        isDevice: Device.isDevice,
+        modelName: Device.modelName,
+        brand: Device.brand,
+        manufacturer: Device.manufacturer,
+        osName: Device.osName,
+        osVersion: Device.osVersion,
+        platformApiLevel: Device.platformApiLevel,
+        supportedCpuArchitectures: Device.supportedCpuArchitectures,
+        totalMemory: Device.totalMemory,
+      },
+      createdAt: serverTimestamp(),
+      createdBy: user?.uid,
+    });
+
+    const WarehouseProductsCol = db.collection(
+      `WarehouseStorage/${selectedWareHouse?._docID || "[__5xx__]"}/products`
+    );
+    const RefillerStorageCol = db.collection(
+      `RefillerStorage/${user?.uid || "[__5xx__]"}/products`
+    );
+
+    try {
+      await Promise.allSettled([
+        updateProductQuantity({
+          col: WarehouseProductsCol,
+          products,
+          increment: false,
+          batch,
+        }),
+        updateProductQuantity({
+          col: RefillerStorageCol,
+          products,
+          increment: true,
+          batch,
+        }),
+      ]);
+
+      await batch.commit();
+
+      setSelectedWareHouse(undefined);
+      setSelectedMachines([]);
+      setProductsQuantity({});
+      setCheckedProducts([]);
+    } catch (error: any) {
+      Alert.alert("Error", error.toString() || "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
   }, [dataTrayProducts, getProductQuantity, selectedWareHouse?._docID]);
 
   const handleSubmit = useCallback(() => {
@@ -176,12 +211,7 @@ const IndexScreen = () => {
       return Alert.alert(
         "Unchecked products",
         `You have ${uncheckedProductsQuantity.length} unchecked products.`,
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-        ]
+        [{ text: "Cancel", style: "cancel" }]
       );
     }
 
@@ -391,7 +421,9 @@ const IndexScreen = () => {
         <Button
           mode="contained"
           icon="check"
-          disabled={!selectedWareHouse || !filteredProducts.length}
+          disabled={
+            submitting || !selectedWareHouse || !filteredProducts.length
+          }
           onPress={handleSubmit}
           loading={submitting}
         >

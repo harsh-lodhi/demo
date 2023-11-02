@@ -3,7 +3,7 @@ import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 const Layout = () => {
   return (
-    <Tabs>
+    <Tabs screenOptions={{ tabBarHideOnKeyboard: true }}>
       <Tabs.Screen
         name="warehouse"
         options={{
@@ -42,6 +42,17 @@ const Layout = () => {
           tabBarIcon: ({ color, size }) => (
             <Icon name="package-variant-closed" color={color} size={size} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: "More",
+          tabBarLabel: "More",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="dots-horizontal" color={color} size={size} />
+          ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen name="home" options={{ href: null }} />

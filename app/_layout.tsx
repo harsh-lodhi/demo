@@ -12,8 +12,18 @@ const Layout = () => {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useUser();
 
-  function onAuthStateChanged(_user: FirebaseAuthTypes.User | null) {
-    setUser(_user);
+  async function onAuthStateChanged(_user: FirebaseAuthTypes.User | null) {
+    const idTokenResult = await _user?.getIdTokenResult();
+
+    let userData = null;
+    if (_user) {
+      userData = {
+        ...(_user.toJSON() as FirebaseAuthTypes.User),
+        claims: idTokenResult?.claims,
+      };
+    }
+
+    setUser(userData);
     if (initializing) setInitializing(false);
   }
 

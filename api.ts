@@ -6,3 +6,10 @@ export const wenderApi = axios.create({
     "Content-type": "application/json",
   },
 });
+
+export const functionApi = axios.create({
+  baseURL: "https://us-central1-go-grab-13dac.cloudfunctions.net",
+  headers: {
+    "Content-type": "application/json",
+  },
+});
