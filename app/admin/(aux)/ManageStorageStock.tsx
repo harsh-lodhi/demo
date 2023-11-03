@@ -21,6 +21,7 @@ import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
 import { DEFAULT_PRODUCT_IMAGE } from "../../../constants";
 import { Tabs } from "expo-router";
 import ProductPicker from "./ProductPicker";
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface _ProductType {
   product_ref: FirebaseFirestoreTypes.DocumentReference;
@@ -162,12 +163,25 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
           title: storageLabel,
           headerRight: () => (
             <>
-              <IconButton
-                icon="magnify"
-                onPress={() => {
-                  setIsSearching((v) => !v);
-                }}
-              />
+              <View>
+                <IconButton
+                  icon={isSearching ? "close" : "magnify"}
+                  onPress={() => {
+                    setIsSearching((v) => !v);
+                  }}
+                />
+                {isSearching ? (
+                  <View
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      alignSelf: "center",
+                    }}
+                  >
+                    <Icon name="chevron-down" size={16} />
+                  </View>
+                ) : null}
+              </View>
               <IconButton
                 icon="plus"
                 onPress={() => {
@@ -184,9 +198,13 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
           placeholder="Search"
           right={
             <TextInput.Icon
-              icon="close"
+              icon="close-circle"
               onPress={() => {
-                setIsSearching(false);
+                if (searchText != "") {
+                  setSearchText("");
+                } else {
+                  setIsSearching(false);
+                }
               }}
             />
           }

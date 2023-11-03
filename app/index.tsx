@@ -31,6 +31,19 @@ const Home = () => {
           </>
         )}
       </List.Section>
+
+      {/* <View
+        style={{
+          alignSelf: "center",
+          alignItems: "center",
+          gap: 8,
+          marginTop: 16,
+        }}
+      >
+        <Button onPress={() => {}}>Check-in</Button>
+        <Timer />
+      </View> */}
+
       <View style={{ flex: 1 }} />
       <View style={{ marginVertical: 16 }}>
         <Text

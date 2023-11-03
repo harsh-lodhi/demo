@@ -15,6 +15,13 @@ const SettingsScreen = () => {
           right={(props) => <List.Icon {...props} icon="chevron-right" />}
           onPress={() => route.push("admin/(tabs)/more/team")}
         />
+        <List.Item
+          title="Product mismatch"
+          description="Issues reported by refillers"
+          left={(props) => <List.Icon {...props} icon="account-multiple" />}
+          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          onPress={() => route.push("admin/(tabs)/more/product-missmatch")}
+        />
       </List.Section>
       <List.Section title="Logs">
         <List.Item

@@ -54,12 +54,6 @@ const MyBag = () => {
       }
     });
 
-    console.log("products", {
-      products,
-      warehouse: selectedWareHouse?._docID,
-      user: user?.uid,
-    });
-
     const batch = db.batch();
     const rldoc = db.collection("returnlog").doc();
     batch.set(rldoc, {
