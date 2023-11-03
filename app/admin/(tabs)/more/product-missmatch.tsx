@@ -12,6 +12,9 @@ import DateTimePicker, {
 import { Stack } from "expo-router";
 import { convertToCSV, shareFile, writeToFile } from "../../../../utils/common";
 import * as Sharing from "expo-sharing";
+import { useProductsState } from "../../../../hooks/appState";
+import { ProductItemType } from "../../../../atoms/app";
+import { formatPrice } from "../../../../utils/currency";
 
 interface ProductMissmatchItem {
   _id: string;
@@ -34,6 +37,7 @@ interface filterType {
 const ProductMissmatch = () => {
   const [showDatePicker, setShowDatePicker] = useState<"Start" | "End">();
   const [filter, setFilter] = useState<filterType>({});
+  const [products] = useProductsState();
 
   const {
     data: users = [],
@@ -62,22 +66,33 @@ const ProductMissmatch = () => {
         query = query.where("createdAt", "<=", filter.end);
       }
 
-      const res = await query.get().then((snapshot) => {
-        const data: ProductMissmatchItem[] = [];
-        snapshot.forEach((doc) => {
-          const d = doc.data() as Omit<ProductMissmatchItem, "_id">;
-          data.push({
-            _id: doc.id,
-            ...d,
-            createdAt: (d.createdAt as any).toDate().toLocaleString("en-IN"),
+      const res = await query
+        .orderBy("createdAt", "desc")
+        .get()
+        .then((snapshot) => {
+          const data: ProductMissmatchItem[] = [];
+          snapshot.forEach((doc) => {
+            const d = doc.data() as Omit<ProductMissmatchItem, "_id">;
+            data.push({
+              _id: doc.id,
+              ...d,
+              createdAt: (d.createdAt as any).toDate()?.toLocaleString("en-IN"),
+            });
           });
+          return data;
         });
-        return data;
-      });
 
       return res;
     },
   });
+
+  const productsObj = useMemo(() => {
+    const obj: Record<string, ProductItemType> = {};
+    products.forEach((product) => {
+      obj[product.product_id] = product;
+    });
+    return obj;
+  }, [products]);
 
   const userObj = useMemo(() => {
     const obj: Record<string, UserType> = {};
@@ -101,6 +116,26 @@ const ProductMissmatch = () => {
       {
         missed: 0,
         extra: 0,
+      }
+    );
+  }, [data]);
+
+  const totalLossNRefund = useMemo(() => {
+    return data?.reduce(
+      (acc, item) => {
+        if (item.difference > 0) {
+          acc.refund +=
+            productsObj[item.product].product_price * item.difference;
+        }
+        if (item.difference < 0) {
+          acc.loss +=
+            productsObj[item.product].product_price * item.difference * -1;
+        }
+        return acc;
+      },
+      {
+        loss: 0,
+        refund: 0,
       }
     );
   }, [data]);
@@ -176,64 +211,76 @@ const ProductMissmatch = () => {
         }}
       >
         <Button style={{ flex: 1 }} onPress={() => setShowDatePicker("Start")}>
-          {filter.start?.toLocaleDateString() || "Start Date"}
+          {filter.start?.toLocaleDateString("en-IN") || "Start Date"}
         </Button>
         <Button style={{ flex: 1 }} onPress={() => setShowDatePicker("End")}>
-          {filter.end?.toLocaleDateString() || "End Date"}
+          {filter.end?.toLocaleDateString("en-IN") || "End Date"}
         </Button>
       </View>
 
       <FlatList
         data={data}
         keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <List.Item
-            title={item.productName}
-            description={() => (
-              <View>
-                <Text>
-                  By: {userObj[item.createdBy]?.displayName || item.createdBy}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: "#aaa",
-                    marginTop: 6,
-                  }}
+        renderItem={({ item }) => {
+          const p = productsObj[item.product];
+          return (
+            <List.Item
+              title={item.productName}
+              description={() => (
+                <View>
+                  <Text>
+                    By: {userObj[item.createdBy]?.displayName || item.createdBy}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#aaa",
+                      marginTop: 6,
+                    }}
+                  >
+                    {item.createdAt}
+                  </Text>
+                </View>
+              )}
+              left={(props) => (
+                <View
+                  style={[
+                    props.style,
+                    {
+                      backgroundColor: "#ddd",
+                      paddingVertical: 8,
+                      width: 50,
+                      borderRadius: 4,
+                    },
+                  ]}
                 >
-                  {item.createdAt}
-                </Text>
-              </View>
-            )}
-            left={(props) => (
-              <View
-                style={[
-                  props.style,
-                  {
-                    backgroundColor: "#ddd",
-                    paddingVertical: 8,
-                    width: 50,
-                    borderRadius: 4,
-                  },
-                ]}
-              >
-                <Text style={{ textAlign: "center" }}>
-                  {item.vendingMachine}
-                </Text>
-              </View>
-            )}
-            right={() => (
-              <View
-                style={{ alignItems: "flex-end", flexDirection: "row", gap: 4 }}
-              >
-                <Text style={{ color: "#ccc" }}>
-                  {item.actualQuantity} - {item.systemQuantity} =
-                </Text>
-                <Text variant="labelLarge">{item.difference}</Text>
-              </View>
-            )}
-          />
-        )}
+                  <Text style={{ textAlign: "center" }}>
+                    {item.vendingMachine}
+                  </Text>
+                </View>
+              )}
+              right={() => (
+                <View style={{ alignItems: "flex-end", gap: 4 }}>
+                  <View
+                    style={{
+                      alignItems: "flex-end",
+                      flexDirection: "row",
+                      gap: 4,
+                    }}
+                  >
+                    <Text style={{ color: "#ccc" }}>
+                      {item.actualQuantity} - {item.systemQuantity} =
+                    </Text>
+                    <Text variant="labelLarge">{item.difference}</Text>
+                  </View>
+                  <Text>
+                    {formatPrice(p.product_price * item.difference * -1)}
+                  </Text>
+                </View>
+              )}
+            />
+          );
+        }}
         refreshing={isLoading || usersLoading}
         onRefresh={() => {
           refetch();
@@ -244,6 +291,10 @@ const ProductMissmatch = () => {
         <Text variant="labelSmall">{data?.length} items</Text>
         <Text>
           {totalDifference?.missed} missed, {totalDifference?.extra} extra
+        </Text>
+        <Text>
+          {formatPrice(totalLossNRefund?.loss || 0)} loss, &{" "}
+          {formatPrice(totalLossNRefund?.refund || 0)} refund
         </Text>
       </View>
     </>
