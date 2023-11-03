@@ -5,6 +5,7 @@ export interface UserType extends FirebaseAuthTypes.User {
   claims?: {
     wenderId?: string;
     role?: "admin";
+    approved?: boolean;
   };
 }
 

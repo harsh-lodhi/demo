@@ -28,7 +28,7 @@ const Layout = () => {
   }
 
   useEffect(() => {
-    const subscriber = auth.onAuthStateChanged(onAuthStateChanged);
+    const subscriber = auth.onIdTokenChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
   }, []);
 

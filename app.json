@@ -7,14 +7,13 @@
     "scheme": "gg-app",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "owner": "hamidlab",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
@@ -37,12 +36,7 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-updates",
-        {
-          "username": "hamidraza"
-        }
-      ],
+      ["expo-updates", { "username": "hamidlab" }],
       "@react-native-firebase/app",
       "@react-native-firebase/perf",
       "@react-native-firebase/crashlytics",

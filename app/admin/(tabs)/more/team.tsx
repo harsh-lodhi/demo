@@ -12,7 +12,14 @@ import {
 } from "react-native-paper";
 import { useQuery } from "react-query";
 import { functionApi } from "../../../../api";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+
+interface CustomClaimsType {
+  role?: "admin";
+  wenderId?: string;
+  approved?: boolean;
+}
 
 interface UserItem {
   uid: string;
@@ -26,10 +33,7 @@ interface UserItem {
     creationTime: string;
     lastRefreshTime: string;
   };
-  customClaims?: {
-    role?: "admin";
-    wenderId?: string;
-  };
+  customClaims?: CustomClaimsType;
   tokensValidAfterTime: string;
   providerData: [
     {
@@ -44,11 +48,9 @@ interface UserItem {
 
 const TeamScreen = () => {
   const [userToEdit, setUserToEdit] = useState<UserItem | null>(null);
-  const [claimData, setClaimData] = useState<{
-    wenderId?: string;
-    role?: "admin";
-  }>({});
+  const [claimData, setClaimData] = useState<CustomClaimsType>({});
   const [saving, setSaving] = useState(false);
+  const [showDisabled, setShowDisabled] = useState(false);
 
   const {
     data = [],
@@ -61,6 +63,12 @@ const TeamScreen = () => {
       return res.data?.users;
     },
   });
+
+  const filteredData = useMemo(() => {
+    return data.filter(
+      (item) => item.disabled === false || showDisabled === true
+    );
+  }, [data, showDisabled]);
 
   const handleUserPress = useCallback((user: UserItem) => {
     setUserToEdit(user);
@@ -98,17 +106,36 @@ const TeamScreen = () => {
   return (
     <>
       <FlatList
-        data={data}
+        data={filteredData}
         renderItem={({ item }) => {
           return (
             <List.Item
-              title={`${item.displayName} (${
-                item.customClaims?.wenderId || "..."
-              })`}
+              title={() => {
+                return (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <Text variant="labelLarge">
+                      {`${item.displayName} (${
+                        item.customClaims?.wenderId || "..."
+                      })`}
+                    </Text>
+                    {item.customClaims?.approved ? (
+                      <Icon name="check-circle" size={16} color="green" />
+                    ) : (
+                      <Icon name="alert-circle" size={16} color="red" />
+                    )}
+                  </View>
+                );
+              }}
               description={() => {
                 return (
                   <View style={{ gap: 4 }}>
-                    <Text>{item.email}</Text>
+                    <Text style={{ color: "#999" }}>{item.email}</Text>
                     <View
                       style={{
                         flexDirection: "row",
@@ -117,7 +144,14 @@ const TeamScreen = () => {
                       }}
                     >
                       {item?.customClaims?.role && (
-                        <Chip compact>{item.customClaims.role}</Chip>
+                        <Chip compact icon="account">
+                          {item.customClaims.role}
+                        </Chip>
+                      )}
+                      {item.disabled && (
+                        <Chip compact icon="alert-circle">
+                          Disabled
+                        </Chip>
                       )}
                     </View>
                   </View>
@@ -146,7 +180,24 @@ const TeamScreen = () => {
         onRefresh={refetch}
         ItemSeparatorComponent={() => <Divider />}
         ListFooterComponent={() => (
-          <View style={{ height: 40, backgroundColor: "transparent" }} />
+          <>
+            <Divider />
+            <List.Item
+              title="Show disabled users"
+              onPress={() => setShowDisabled((prev) => !prev)}
+              left={(props) => (
+                <View {...props}>
+                  <Checkbox
+                    status={showDisabled ? "checked" : "unchecked"}
+                    onPress={() => setShowDisabled((prev) => !prev)}
+                  />
+                </View>
+              )}
+            />
+
+            <Divider />
+            <View style={{ height: 40, backgroundColor: "transparent" }} />
+          </>
         )}
       />
 
@@ -159,6 +210,16 @@ const TeamScreen = () => {
               value={claimData.wenderId}
               onChangeText={(text) =>
                 setClaimData({ ...claimData, wenderId: text })
+              }
+            />
+            <Checkbox.Item
+              label="Approved"
+              status={claimData.approved ? "checked" : "unchecked"}
+              onPress={() =>
+                setClaimData({
+                  ...claimData,
+                  approved: !claimData.approved,
+                })
               }
             />
             <Checkbox.Item
