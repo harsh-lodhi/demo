@@ -9,6 +9,7 @@ import ManageStorageStock from "../admin/(aux)/ManageStorageStock";
 const storage = () => {
   const params = useLocalSearchParams<{
     storageName: Storage;
+    storageLabel: string;
     id: string;
   }>();
 
@@ -26,7 +27,12 @@ const storage = () => {
       <StorageInfo storageName={Storage.REFILLER} id={params.id} />
       <StorageInfo storageName={Storage.WAREHOUSE} id={params.id} />
 
-      <ManageStorageStock storageName={params.storageName} id={params.id} ops />
+      <ManageStorageStock
+        storageName={params.storageName}
+        storageLabel={params.storageLabel}
+        id={params.id}
+        ops
+      />
     </>
   );
 };

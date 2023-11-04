@@ -14,6 +14,7 @@ const WarehouseOpsScreen = () => {
       pathname: "/ops/ops-storage",
       params: {
         storageName: Storage.WAREHOUSE,
+        storageLabel: item.name,
         id: item._docID,
       },
     });

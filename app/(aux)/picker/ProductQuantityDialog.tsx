@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import { Portal, Dialog, TextInput, Button, Chip } from "react-native-paper";
 
@@ -54,12 +54,18 @@ const ProductQuantityDialog: FC<ProductQuantityDialogProps> = ({
 
     if (quantity) {
       onSubmit(quantity);
+      setQuantityValue("");
     }
   };
 
+  const handleDismiss = useCallback(() => {
+    setQuantityValue("");
+    onDismiss();
+  }, [onDismiss]);
+
   return (
     <Portal>
-      <Dialog visible={!!selectedProduct} onDismiss={onDismiss}>
+      <Dialog visible={!!selectedProduct} onDismiss={handleDismiss}>
         <Dialog.Title>{selectedProduct?.product_name}</Dialog.Title>
 
         <Dialog.Content style={{ gap: 16 }}>

@@ -5,7 +5,7 @@ const OpsLayout = () => {
   return (
     <Tabs screenOptions={{ tabBarHideOnKeyboard: true }}>
       <Tabs.Screen
-        name="index"
+        name="pick"
         options={{
           title: "Pick items",
           tabBarLabel: "Pick",

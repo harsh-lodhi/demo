@@ -52,7 +52,7 @@ const IndexScreen = () => {
 
   const {
     isLoading: isLoadingTrayProducts,
-    data: dataTrayProducts,
+    data: dataTrayProducts = [],
     refetch: refetchTrayProducts,
   } = useQuery({
     queryKey: ["PickTrayProducts", ...machineIds],
@@ -85,21 +85,17 @@ const IndexScreen = () => {
     },
   });
 
-  const selectedProductIds = useMemo(() => {
+  const allProducts = useMemo(() => {
     return (
-      [...(dataTrayProducts || []), ...newProducts].map(
-        (item) => `${item.product_id}`
-      ) ?? []
-    );
-  }, [dataTrayProducts, newProducts]);
-
-  const filteredProducts = useMemo(() => {
-    return (
-      [...(dataTrayProducts || []), ...newProducts].sort((a, b) => {
+      [...dataTrayProducts, ...newProducts].sort((a, b) => {
         return a.product_name.localeCompare(b.product_name);
       }) ?? []
     );
   }, [dataTrayProducts, newProducts]);
+
+  const selectedProductIds = useMemo(() => {
+    return allProducts.map((item) => `${item.product_id}`) ?? [];
+  }, [allProducts]);
 
   const handlePickerDismiss = useCallback(() => {
     setPickerVisible(false);
@@ -130,7 +126,7 @@ const IndexScreen = () => {
   const handleConfirmSubmit = useCallback(async () => {
     const products: Record<string, number> = {};
 
-    dataTrayProducts?.forEach((item) => {
+    allProducts.forEach((item) => {
       const qty = getProductQuantity(item);
       if (qty != 0) {
         products[item.product_id] = qty;
@@ -191,15 +187,26 @@ const IndexScreen = () => {
       setSelectedMachines([]);
       setProductsQuantity({});
       setCheckedProducts([]);
+      setNewProducts([]);
     } catch (error: any) {
       Alert.alert("Error", error.toString() || "Something went wrong");
     } finally {
       setSubmitting(false);
     }
-  }, [dataTrayProducts, getProductQuantity, selectedWareHouse?._docID]);
+  }, [
+    allProducts,
+    getProductQuantity,
+    selectedWareHouse?._docID,
+    user?.uid,
+    setSelectedWareHouse,
+    setSelectedMachines,
+    setProductsQuantity,
+    setCheckedProducts,
+    setNewProducts,
+  ]);
 
   const handleSubmit = useCallback(() => {
-    const uncheckedProducts = dataTrayProducts?.filter(
+    const uncheckedProducts = allProducts.filter(
       (item) => !checkedProducts.includes(item.product_id)
     );
 
@@ -230,12 +237,7 @@ const IndexScreen = () => {
       ],
       { cancelable: false }
     );
-  }, [
-    checkedProducts,
-    dataTrayProducts,
-    handleConfirmSubmit,
-    productsQuantity,
-  ]);
+  }, [checkedProducts, allProducts, getProductQuantity]);
 
   const handleToggleCheckedProduct = useCallback((productId: number) => {
     setCheckedProducts((prevState) => {
@@ -333,7 +335,7 @@ const IndexScreen = () => {
       </View>
 
       <FlatList
-        data={filteredProducts}
+        data={allProducts}
         keyExtractor={(item) => `${item.product_id}`}
         renderItem={({ item }) => {
           const qty = getProductQuantity(item);
@@ -421,9 +423,7 @@ const IndexScreen = () => {
         <Button
           mode="contained"
           icon="check"
-          disabled={
-            submitting || !selectedWareHouse || !filteredProducts.length
-          }
+          disabled={submitting || !selectedWareHouse || !allProducts.length}
           onPress={handleSubmit}
           loading={submitting}
         >
@@ -469,7 +469,7 @@ const IndexScreen = () => {
         }}
         icon="plus"
         onPress={() => setProductPickerVisible(true)}
-        disabled={!selectedMachines.length}
+        // disabled={!selectedMachines.length}
       />
     </>
   );
