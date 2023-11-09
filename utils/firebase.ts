@@ -47,49 +47,101 @@ export const updateProductQuantity = async ({
 
   const productAudits: Record<string, AuditType> = {};
 
-  for (const id in products) {
-    const productRef = col.doc(id);
+  const productsData = await Promise.all(
+    Object.keys(products).map(async (id) => {
+      const ref = col.doc(id);
+      const doc = await ref.get();
+      return { id, ref, doc, data: doc.data() };
+    })
+  );
 
-    let _audit: AuditType = {
+  productsData.forEach(({ id, ref, doc, data }) => {
+    if (!batch) {
+      throw new Error("Batch is not defined");
+    }
+
+    productAudits[id] = {
       quantity: products[id],
       operation: "set",
       increment,
-      productRef,
+      productRef: ref,
     };
 
-    const productDoc = await productRef.get();
-    const productData = productDoc.data();
-    if (!productDoc.exists || !productData) {
-      batch.set(productRef, {
+    if (!doc.exists || !data) {
+      batch.set(ref, {
         quantity: increment ? products[id] : products[id] * -1,
         createdAt: serverTimestamp(),
         product_ref: db.doc(`Products/${id}`),
       });
-    } else {
-      const expectedFinalQuantity = increment
-        ? productData.quantity + products[id]
-        : productData.quantity - products[id];
-
-      _audit = {
-        ..._audit,
-        expectedFinalQuantity,
-        operation: expectedFinalQuantity === 0 ? "delete" : "update",
-      };
-
-      if (expectedFinalQuantity == 0) {
-        batch.delete(productRef);
-      } else {
-        batch.update(productRef, {
-          quantity: firestore.FieldValue.increment(
-            increment ? products[id] : products[id] * -1
-          ),
-          updatedAt: serverTimestamp(),
-        });
-      }
+      return;
     }
 
-    productAudits[id] = _audit;
-  }
+    const expectedFinalQuantity = increment
+      ? data.quantity + products[id]
+      : data.quantity - products[id];
+
+    productAudits[id] = {
+      ...productAudits[id],
+      expectedFinalQuantity,
+      operation: expectedFinalQuantity === 0 ? "delete" : "update",
+    };
+
+    if (expectedFinalQuantity == 0) {
+      batch.delete(ref);
+      return;
+    }
+
+    batch.update(ref, {
+      quantity: firestore.FieldValue.increment(
+        increment ? products[id] : products[id] * -1
+      ),
+      updatedAt: serverTimestamp(),
+    });
+  });
+
+  // for (const id in products) {
+  //   const productRef = col.doc(id);
+
+  //   let _audit: AuditType = {
+  //     quantity: products[id],
+  //     operation: "set",
+  //     increment,
+  //     productRef,
+  //   };
+
+  //   const productDoc = await productRef.get();
+  //   const productData = productDoc.data();
+  //   if (!productDoc.exists || !productData) {
+  //     batch.set(productRef, {
+  //       quantity: increment ? products[id] : products[id] * -1,
+  //       createdAt: serverTimestamp(),
+  //       product_ref: db.doc(`Products/${id}`),
+  //     });
+  //   } else {
+  //     const expectedFinalQuantity = increment
+  //       ? productData.quantity + products[id]
+  //       : productData.quantity - products[id];
+
+  //     _audit = {
+  //       ..._audit,
+  //       expectedFinalQuantity,
+  //       operation: expectedFinalQuantity === 0 ? "delete" : "update",
+  //     };
+
+  //     if (expectedFinalQuantity == 0) {
+  //       batch.delete(productRef);
+  //     } else {
+  //       batch.update(productRef, {
+  //         quantity: firestore.FieldValue.increment(
+  //           increment ? products[id] : products[id] * -1
+  //         ),
+  //         updatedAt: serverTimestamp(),
+  //       });
+  //     }
+  //   }
+
+  //   productAudits[id] = _audit;
+  // }
 
   const auditCol = db.collection("Audits");
   const productQuantityAuditCol = auditCol.doc("ProductQuantity");

@@ -141,19 +141,19 @@ const IndexScreen = () => {
     batch.set(pickLogRef, {
       products,
       warehouse: selectedWareHouse?._docID,
-      createdByDevice: {
-        deviceName: Device.deviceName,
-        deviceYearClass: Device.deviceYearClass,
-        isDevice: Device.isDevice,
-        modelName: Device.modelName,
-        brand: Device.brand,
-        manufacturer: Device.manufacturer,
-        osName: Device.osName,
-        osVersion: Device.osVersion,
-        platformApiLevel: Device.platformApiLevel,
-        supportedCpuArchitectures: Device.supportedCpuArchitectures,
-        totalMemory: Device.totalMemory,
-      },
+      // createdByDevice: {
+      //   deviceName: Device.deviceName,
+      //   deviceYearClass: Device.deviceYearClass,
+      //   isDevice: Device.isDevice,
+      //   modelName: Device.modelName,
+      //   brand: Device.brand,
+      //   manufacturer: Device.manufacturer,
+      //   osName: Device.osName,
+      //   osVersion: Device.osVersion,
+      //   platformApiLevel: Device.platformApiLevel,
+      //   supportedCpuArchitectures: Device.supportedCpuArchitectures,
+      //   totalMemory: Device.totalMemory,
+      // },
       createdAt: serverTimestamp(),
       createdBy: user?.uid,
     });
@@ -166,20 +166,19 @@ const IndexScreen = () => {
     );
 
     try {
-      await Promise.allSettled([
-        updateProductQuantity({
-          col: WarehouseProductsCol,
-          products,
-          increment: false,
-          batch,
-        }),
-        updateProductQuantity({
-          col: RefillerStorageCol,
-          products,
-          increment: true,
-          batch,
-        }),
-      ]);
+      await updateProductQuantity({
+        col: WarehouseProductsCol,
+        products,
+        increment: false,
+        batch,
+      });
+
+      await updateProductQuantity({
+        col: RefillerStorageCol,
+        products,
+        increment: true,
+        batch,
+      });
 
       await batch.commit();
 

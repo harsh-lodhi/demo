@@ -45,8 +45,33 @@ const OpsLayout = () => {
         }}
       />
       <Tabs.Screen
+        name="machine-refill"
+        options={{
+          href: null,
+          title: "M Refill",
+          tabBarLabel: "M Refill",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="fridge" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="refill.new"
+        options={{
+          href: null,
+          headerShown: false,
+          title: "Refill",
+          tabBarLabel: "Refill",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="fridge-outline" color={color} size={size} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="refill"
         options={{
+          // headerShown: false,
           title: "Refill",
           tabBarLabel: "Refill",
           tabBarIcon: ({ color, size }) => (
