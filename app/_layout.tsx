@@ -20,6 +20,7 @@ const Layout = () => {
       userData = {
         ...(_user.toJSON() as FirebaseAuthTypes.User),
         claims: idTokenResult?.claims,
+        idTokenResult,
       };
     }
 

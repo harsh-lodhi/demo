@@ -13,3 +13,10 @@ export const functionApi = axios.create({
     "Content-type": "application/json",
   },
 });
+
+export const api = axios.create({
+  baseURL: "https://api.gograb.hamidlab.com/api",
+  headers: {
+    "Content-type": "application/json",
+  },
+});

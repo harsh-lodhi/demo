@@ -7,6 +7,7 @@ export interface UserType extends FirebaseAuthTypes.User {
     role?: "admin";
     approved?: boolean;
   };
+  idTokenResult?: FirebaseAuthTypes.IdTokenResult;
 }
 
 export const userState = atom<UserType | null>({

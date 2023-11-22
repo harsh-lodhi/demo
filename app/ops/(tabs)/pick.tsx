@@ -8,17 +8,12 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import MachinePickerModal from "../../../components/MachinePickerModal";
 import { useQuery } from "react-query";
-import { wenderApi } from "../../../api";
+import { api, wenderApi } from "../../../api";
 import { useWarehousesState } from "../../../hooks/appState";
 import ProductQuantityDialog, {
   ProductItem,
 } from "../../(aux)/picker/ProductQuantityDialog";
-import {
-  db,
-  serverTimestamp,
-  updateProductQuantity,
-} from "../../../utils/firebase";
-import * as Device from "expo-device";
+import { db, serverTimestamp } from "../../../utils/firebase";
 import ProductPicker from "../../admin/(aux)/ProductPicker";
 import { useUser } from "../../../hooks/useUserInfo";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
@@ -124,7 +119,15 @@ const IndexScreen = () => {
   }, []);
 
   const handleConfirmSubmit = useCallback(async () => {
+    const idToken = user?.idTokenResult?.token;
     const products: Record<string, number> = {};
+
+    if (!idToken) {
+      return Alert.alert(
+        "Error",
+        "idToken not found, please reload the app, and try again."
+      );
+    }
 
     allProducts.forEach((item) => {
       const qty = getProductQuantity(item);
@@ -132,8 +135,6 @@ const IndexScreen = () => {
         products[item.product_id] = qty;
       }
     });
-
-    setSubmitting(true);
 
     const batch = db.batch();
     const pickLogRef = db.collection("picklog").doc();
@@ -166,42 +167,50 @@ const IndexScreen = () => {
     );
 
     try {
-      await updateProductQuantity({
-        col: WarehouseProductsCol,
-        products,
-        increment: false,
-        batch,
-      });
+      // await updateProductQuantity({
+      //   col: WarehouseProductsCol,
+      //   products,
+      //   increment: false,
+      //   batch,
+      // });
 
-      await updateProductQuantity({
-        col: RefillerStorageCol,
-        products,
-        increment: true,
-        batch,
-      });
+      // await updateProductQuantity({
+      //   col: RefillerStorageCol,
+      //   products,
+      //   increment: true,
+      //   batch,
+      // });
+
+      await api.post(
+        "/updateProductQuantity",
+        [
+          {
+            collectionPath: WarehouseProductsCol.path,
+            products,
+            increment: false,
+          },
+          {
+            collectionPath: RefillerStorageCol.path,
+            products,
+            increment: true,
+          },
+        ],
+        { headers: { Authorization: `Bearer ${idToken}` } }
+      );
 
       await batch.commit();
-
-      setSelectedWareHouse(undefined);
-      setSelectedMachines([]);
-      setProductsQuantity({});
-      setCheckedProducts([]);
-      setNewProducts([]);
+      return batch;
     } catch (error: any) {
       Alert.alert("Error", error.toString() || "Something went wrong");
-    } finally {
-      setSubmitting(false);
+      throw error;
     }
   }, [
     allProducts,
     getProductQuantity,
+    productsQuantity,
     selectedWareHouse?._docID,
+    user?.idTokenResult?.token,
     user?.uid,
-    setSelectedWareHouse,
-    setSelectedMachines,
-    setProductsQuantity,
-    setCheckedProducts,
-    setNewProducts,
   ]);
 
   const handleSubmit = useCallback(() => {
@@ -231,12 +240,38 @@ const IndexScreen = () => {
         },
         {
           text: "Submit",
-          onPress: handleConfirmSubmit,
+          onPress: async () => {
+            try {
+              setSubmitting(true);
+              await handleConfirmSubmit();
+            } catch (error: any) {
+              console.error(error);
+              Alert.alert("Error", error.toString() || "Something went wrong");
+            } finally {
+              setSelectedWareHouse(undefined);
+              setSelectedMachines([]);
+              setProductsQuantity({});
+              setCheckedProducts([]);
+              setNewProducts([]);
+              setSubmitting(false);
+            }
+          },
         },
       ],
       { cancelable: false }
     );
-  }, [checkedProducts, allProducts, getProductQuantity]);
+  }, [
+    allProducts,
+    checkedProducts,
+    getProductQuantity,
+    handleConfirmSubmit,
+    setSubmitting,
+    setSelectedWareHouse,
+    setSelectedMachines,
+    setProductsQuantity,
+    setCheckedProducts,
+    setNewProducts,
+  ]);
 
   const handleToggleCheckedProduct = useCallback((productId: number) => {
     setCheckedProducts((prevState) => {
