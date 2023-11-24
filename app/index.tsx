@@ -1,5 +1,6 @@
-import { View } from "react-native";
+import { ToastAndroid, View } from "react-native";
 import {
+  Banner,
   Button,
   Divider,
   IconButton,
@@ -10,8 +11,10 @@ import {
 import { Stack, router } from "expo-router";
 import { useUser } from "../hooks/useUserInfo";
 import * as Application from "expo-application";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { signOut } from "../utils/auth";
+import * as Updates from "expo-updates";
+import { useQuery } from "react-query";
 
 const StackScreenOptions = () => {
   const [show, setShow] = useState(false);
@@ -40,6 +43,35 @@ const StackScreenOptions = () => {
 
 const Home = () => {
   const [user] = useUser();
+  const [applyingUpdate, setApplyingUpdate] = useState(false);
+
+  const {
+    data: update,
+    refetch: checkForUpdate,
+    isFetching: isCheckingForUpdate,
+  } = useQuery({
+    queryKey: "checkForUpdate",
+    queryFn: async () => {
+      if (__DEV__) return;
+      return await Updates.checkForUpdateAsync();
+    },
+    refetchInterval: 1000 * 60 * 60 * 24,
+  });
+
+  const updateApp = useCallback(async () => {
+    try {
+      setApplyingUpdate(true);
+      await Updates.fetchUpdateAsync();
+      await Updates.reloadAsync();
+    } catch (error: any) {
+      ToastAndroid.show(
+        error.message ?? "Error applying update. Please try again later.",
+        ToastAndroid.LONG
+      );
+    } finally {
+      setApplyingUpdate(false);
+    }
+  }, []);
 
   if (!user?.claims?.approved) {
     return (
@@ -77,6 +109,22 @@ const Home = () => {
   return (
     <>
       <StackScreenOptions />
+
+      <Banner
+        visible={!!update?.isAvailable}
+        actions={[
+          {
+            label: applyingUpdate ? "Updating..." : "Apply Update",
+            loading: applyingUpdate,
+            disabled: applyingUpdate,
+            onPress: updateApp,
+          },
+        ]}
+        icon="information"
+      >
+        A new update is available.
+      </Banner>
+
       <View style={{ flex: 1 }}>
         <List.Section>
           <List.Subheader>Navigation</List.Subheader>
@@ -101,19 +149,29 @@ const Home = () => {
           )}
         </List.Section>
 
-        {/* <View
-        style={{
-          alignSelf: "center",
-          alignItems: "center",
-          gap: 8,
-          marginTop: 16,
-        }}
-      >
-        <Button onPress={() => {}}>Check-in</Button>
-        <Timer />
-      </View> */}
-
         <View style={{ flex: 1 }} />
+
+        <View style={{ opacity: 0.4 }}>
+          {isCheckingForUpdate ? (
+            <View style={{ alignSelf: "center", alignItems: "center" }}>
+              <Text variant="labelSmall">Checking for updates...</Text>
+            </View>
+          ) : (
+            !update?.isAvailable && (
+              <View style={{ alignSelf: "center", alignItems: "center" }}>
+                <Text variant="labelSmall">You are on the latest version.</Text>
+                <Button
+                  onPress={() => checkForUpdate()}
+                  loading={isCheckingForUpdate}
+                  disabled={isCheckingForUpdate}
+                >
+                  Check for updates
+                </Button>
+              </View>
+            )
+          )}
+        </View>
+
         <View style={{ marginVertical: 16 }}>
           <Text
             variant="labelSmall"
@@ -121,6 +179,12 @@ const Home = () => {
           >
             Version: {Application.nativeApplicationVersion}-
             {Application.nativeBuildVersion}
+          </Text>
+          <Text
+            variant="labelSmall"
+            style={{ textAlign: "center", color: "#ccc" }}
+          >
+            ({Updates.updateId || "null"})
           </Text>
         </View>
       </View>
