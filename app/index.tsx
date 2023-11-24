@@ -23,7 +23,7 @@ const StackScreenOptions = () => {
   return (
     <Stack.Screen
       options={{
-        title: "GoGrab",
+        title: "Go-Grab",
         headerRight: () => (
           <Menu
             visible={show}
