@@ -12,6 +12,7 @@ import {
 } from "../../../utils/firebase";
 import Loader from "../../../components/Loader/Loader";
 import { format } from "date-fns";
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 function addDaysToDate(days: number, date = new Date()) {
   const result = new Date(date);
@@ -123,10 +124,14 @@ const RefillScreen = () => {
         renderItem={({ item }) => (
           <List.Item
             title={item.refiller_name}
-            description={format(
-              new Date(item.created_at),
-              "dd-MMM-yyyy hh:mm a"
-            )}
+            description={
+              <View>
+                <Text>
+                  {format(new Date(item.created_at), "dd-MMM-yyyy hh:mm a")}
+                </Text>
+                <Text variant="labelSmall">RID: {item.refill_id}</Text>
+              </View>
+            }
             left={(props) => (
               <View
                 {...props}
@@ -142,6 +147,9 @@ const RefillScreen = () => {
               >
                 <Text>{item.machine_id}</Text>
               </View>
+            )}
+            right={(props) => (
+              <Icon {...props} name="chevron-right" size={24} />
             )}
             onPress={() => setSelectedRefillId(item.refill_id)}
           />
@@ -174,11 +182,13 @@ const RefillScreen = () => {
         }}
       />
 
-      <RefillProductsModal
-        id={selectedRefillId}
-        onDismiss={() => setSelectedRefillId(undefined)}
-        onSubmit={handleSubmit}
-      />
+      {selectedRefillId && (
+        <RefillProductsModal
+          id={selectedRefillId}
+          onDismiss={() => setSelectedRefillId(undefined)}
+          onSubmit={handleSubmit}
+        />
+      )}
 
       <Loader visible={saving} />
     </>

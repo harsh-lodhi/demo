@@ -1,5 +1,6 @@
 import { useRecoilState } from "recoil";
 import {
+  categoriesState,
   productsQuantityState,
   productsState,
   teamMemberState,
@@ -25,4 +26,8 @@ export const useWarehousesState = () => {
 
 export const useProductsQuantityState = () => {
   return useRecoilState(productsQuantityState);
+};
+
+export const useCategoriesState = () => {
+  return useRecoilState(categoriesState);
 };

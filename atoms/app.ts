@@ -125,3 +125,12 @@ export const productsQuantityState = atom<{
     data: {},
   },
 });
+
+export interface CategoryItemType {
+  category_name: string;
+}
+
+export const categoriesState = atom<Record<string, CategoryItemType>>({
+  key: "categoriesState",
+  default: {},
+});
