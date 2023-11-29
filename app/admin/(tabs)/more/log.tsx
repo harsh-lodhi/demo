@@ -1,5 +1,5 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import { FlatList, View } from "react-native";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Alert, FlatList, View } from "react-native";
 import { List, Text } from "react-native-paper";
 import { useQuery } from "react-query";
 import { db } from "../../../../utils/firebase";
@@ -20,6 +20,7 @@ interface LogItem {
 
 const LogView = () => {
   const searchParams = useLocalSearchParams();
+  const router = useRouter();
 
   const {
     data: users = [],
@@ -113,6 +114,11 @@ const LogView = () => {
               description={`By ${user?.displayName}`}
               left={(props) => <List.Icon {...props} icon="account-multiple" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => {
+                router.push(
+                  `admin/(tabs)/more/log-details?col=${searchParams.type}&id=${item._id}`
+                );
+              }}
             />
           );
         }}
