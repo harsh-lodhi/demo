@@ -1,15 +1,19 @@
-import { Alert, FlatList, StyleSheet, View } from "react-native";
+import { Alert, FlatList, SectionList, StyleSheet, View } from "react-native";
 import { Button, Chip, FAB, List, Menu, Text } from "react-native-paper";
 import {
   ProductItemType,
   VendingMachineItemType,
   WarehouseItemType,
 } from "../../../atoms/app";
-import { useCallback, useMemo, useState } from "react";
+import React, { FC, useCallback, useMemo, useState } from "react";
 import MachinePickerModal from "../../../components/MachinePickerModal";
 import { useQuery } from "react-query";
 import { api, wenderApi } from "../../../api";
-import { useWarehousesState } from "../../../hooks/appState";
+import {
+  useCategoriesState,
+  useProductsState,
+  useWarehousesState,
+} from "../../../hooks/appState";
 import ProductQuantityDialog, {
   ProductItem,
 } from "../../(aux)/picker/ProductQuantityDialog";
@@ -17,6 +21,72 @@ import { db, serverTimestamp } from "../../../utils/firebase";
 import ProductPicker from "../../admin/(aux)/ProductPicker";
 import { useUser } from "../../../hooks/useUserInfo";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+
+interface ProductItemProps {
+  item: ProductItem;
+  checked?: boolean;
+  qty: number;
+  onEditQuantityPress: () => void;
+  onPress: () => void;
+  onLongPress: () => void;
+}
+
+const ProductListItem = React.memo<ProductItemProps>(
+  ({
+    item,
+    checked = false,
+    qty,
+    onEditQuantityPress,
+    onPress,
+    onLongPress,
+  }) => {
+    // const qty = getProductQuantity(item);
+    // const isChecked = checkedProducts.includes(item.product_id);
+    return (
+      <List.Item
+        style={{ opacity: qty > 0 ? 1 : 0.5 }}
+        title={item.product_name}
+        description={
+          item.total_units == 0
+            ? "New Item"
+            : `Left: ${item.left_units} / Total: ${item.total_units}`
+        }
+        left={(props) => (
+          <Icon
+            {...props}
+            name={
+              checked
+                ? "checkbox-marked-circle-outline"
+                : "checkbox-blank-circle-outline"
+            }
+            color={checked ? "green" : props.color ?? "rgba(0, 0, 0, 0.54)"}
+            size={24}
+          />
+        )}
+        right={(props) => (
+          <Button
+            style={props.style}
+            onPress={onEditQuantityPress}
+            // icon="pencil-outline"
+            compact
+          >
+            <Text
+              variant="headlineSmall"
+              style={{
+                color: "#0bbf64",
+              }}
+            >
+              {qty}
+            </Text>
+          </Button>
+        )}
+        // onPress={() => setSelectedProduct(item)}
+        onLongPress={onLongPress}
+        onPress={onPress}
+      />
+    );
+  }
+);
 
 const IndexScreen = () => {
   const [user] = useUser();
@@ -33,6 +103,9 @@ const IndexScreen = () => {
   const [productsQuantity, setProductsQuantity] = useState<
     Record<string, number>
   >({});
+
+  const [categories] = useCategoriesState();
+  const [_products] = useProductsState();
 
   const [checkedProducts, setCheckedProducts] = useState<number[]>([]);
 
@@ -60,8 +133,6 @@ const IndexScreen = () => {
       const products = res.flatMap(({ data }) => {
         return data.data[0].rows_details;
       }) as ProductItem[];
-
-      // return products;
 
       const o: { [key: string]: ProductItem } = {};
       products.forEach((item) => {
@@ -91,6 +162,44 @@ const IndexScreen = () => {
   const selectedProductIds = useMemo(() => {
     return allProducts.map((item) => `${item.product_id}`) ?? [];
   }, [allProducts]);
+
+  const groupedProducts = useMemo(() => {
+    const result: {
+      title: string; // category name
+      data: ProductItem[];
+    }[] = [];
+
+    const productsMap = _products.reduce((acc, item) => {
+      acc[item.product_id] = item;
+      return acc;
+    }, {} as Record<string, ProductItemType>);
+
+    const productCategoryMap = allProducts.reduce((acc, item) => {
+      const _p = productsMap[item.product_id];
+      if (!_p) return acc;
+
+      const categoryName =
+        categories[_p.category_id]?.category_name ?? "Uncategorized";
+
+      if (!acc[categoryName]) {
+        acc[categoryName] = [];
+      }
+
+      acc[categoryName].push(item);
+      return acc;
+    }, {} as Record<string, ProductItem[]>);
+
+    Object.entries(productCategoryMap).forEach(([key, value]) => {
+      result.push({
+        title: key,
+        data: value,
+      });
+    });
+
+    return result.sort((a, b) => {
+      return a.title.localeCompare(b.title);
+    });
+  }, [allProducts, categories]);
 
   const handlePickerDismiss = useCallback(() => {
     setPickerVisible(false);
@@ -142,19 +251,6 @@ const IndexScreen = () => {
     batch.set(pickLogRef, {
       products,
       warehouse: selectedWareHouse?._docID,
-      // createdByDevice: {
-      //   deviceName: Device.deviceName,
-      //   deviceYearClass: Device.deviceYearClass,
-      //   isDevice: Device.isDevice,
-      //   modelName: Device.modelName,
-      //   brand: Device.brand,
-      //   manufacturer: Device.manufacturer,
-      //   osName: Device.osName,
-      //   osVersion: Device.osVersion,
-      //   platformApiLevel: Device.platformApiLevel,
-      //   supportedCpuArchitectures: Device.supportedCpuArchitectures,
-      //   totalMemory: Device.totalMemory,
-      // },
       createdAt: serverTimestamp(),
       createdBy: user?.uid,
     });
@@ -167,20 +263,6 @@ const IndexScreen = () => {
     );
 
     try {
-      // await updateProductQuantity({
-      //   col: WarehouseProductsCol,
-      //   products,
-      //   increment: false,
-      //   batch,
-      // });
-
-      // await updateProductQuantity({
-      //   col: RefillerStorageCol,
-      //   products,
-      //   increment: true,
-      //   batch,
-      // });
-
       await api.post(
         "/updateProductQuantity",
         [
@@ -368,58 +450,56 @@ const IndexScreen = () => {
         </Chip>
       </View>
 
-      <FlatList
+      {/* <FlatList
         data={allProducts}
         keyExtractor={(item) => `${item.product_id}`}
         renderItem={({ item }) => {
           const qty = getProductQuantity(item);
           const isChecked = checkedProducts.includes(item.product_id);
+
           return (
-            <List.Item
-              style={{ opacity: qty > 0 ? 1 : 0.5 }}
-              title={item.product_name}
-              description={
-                item.total_units == 0
-                  ? "New Item"
-                  : `Left: ${item.left_units} / Total: ${item.total_units}`
-              }
-              left={(props) => (
-                <Icon
-                  {...props}
-                  name={
-                    isChecked
-                      ? "checkbox-marked-circle-outline"
-                      : "checkbox-blank-circle-outline"
-                  }
-                  color={
-                    isChecked ? "green" : props.color ?? "rgba(0, 0, 0, 0.54)"
-                  }
-                  size={24}
-                />
-              )}
-              right={(props) => (
-                <Button
-                  style={props.style}
-                  onPress={() => setSelectedProduct(item)}
-                  // icon="pencil-outline"
-                  compact
-                >
-                  <Text
-                    variant="headlineSmall"
-                    style={{
-                      color: "#0bbf64",
-                    }}
-                  >
-                    {qty}
-                  </Text>
-                </Button>
-              )}
-              // onPress={() => setSelectedProduct(item)}
-              onLongPress={() => emptyProduct(item)}
+            <ProductListItem
+              item={item}
+              checked={isChecked}
+              qty={qty}
+              onEditQuantityPress={() => setSelectedProduct(item)}
               onPress={() => handleToggleCheckedProduct(item.product_id)}
+              onLongPress={() => emptyProduct(item)}
             />
           );
         }}
+        refreshing={isLoadingTrayProducts}
+        ListFooterComponent={() => <View style={{ height: 80 }} />}
+        onRefresh={() => {
+          // refetch();
+          refetchTrayProducts();
+        }}
+      /> */}
+
+      <SectionList
+        sections={groupedProducts}
+        keyExtractor={(item) => `${item.product_id}`}
+        stickySectionHeadersEnabled
+        renderItem={({ item }) => {
+          const qty = getProductQuantity(item);
+          const isChecked = checkedProducts.includes(item.product_id);
+
+          return (
+            <ProductListItem
+              item={item}
+              checked={isChecked}
+              qty={qty}
+              onEditQuantityPress={() => setSelectedProduct(item)}
+              onPress={() => handleToggleCheckedProduct(item.product_id)}
+              onLongPress={() => emptyProduct(item)}
+            />
+          );
+        }}
+        renderSectionHeader={({ section: { title } }) => (
+          <List.Subheader style={{ backgroundColor: "#fff", elevation: 1 }}>
+            {title}
+          </List.Subheader>
+        )}
         refreshing={isLoadingTrayProducts}
         ListFooterComponent={() => <View style={{ height: 80 }} />}
         onRefresh={() => {
