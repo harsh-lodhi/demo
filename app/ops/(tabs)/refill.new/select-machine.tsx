@@ -1,10 +1,11 @@
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Stack, useRouter } from "expo-router";
+import { useCallback } from "react";
 import { FlatList, View } from "react-native";
 import { Divider, List, Text } from "react-native-paper";
-import { useVendingMachinesState } from "../../../../hooks/appState";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import { useCallback } from "react";
+
 import { VendingMachineItemType } from "../../../../atoms/app";
+import { useVendingMachinesState } from "../../../../hooks/appState";
 
 const ScreenOptions = () => {
   return <Stack.Screen options={{ title: "Select machine" }} />;
@@ -14,11 +15,14 @@ const SelectMachineScreen = () => {
   const [machines] = useVendingMachinesState();
   const router = useRouter();
 
-  const handleItemPress = useCallback((item: VendingMachineItemType) => {
-    router.push(
-      `/ops/(tabs)/refill/refill-machine?machine_id=${item.machine_id}`
-    );
-  }, []);
+  const handleItemPress = useCallback(
+    (item: VendingMachineItemType) => {
+      router.push(
+        `/ops/(tabs)/refill.new/refill-machine?machine_id=${item.machine_id}`,
+      );
+    },
+    [router],
+  );
 
   return (
     <>

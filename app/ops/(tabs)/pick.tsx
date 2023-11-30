@@ -1,26 +1,27 @@
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import React, { useCallback, useMemo, useState } from "react";
 import { Alert, FlatList, SectionList, StyleSheet, View } from "react-native";
 import { Button, Chip, FAB, List, Menu, Text } from "react-native-paper";
+import { useQuery } from "react-query";
+
+import ProductQuantityDialog, {
+  ProductItem,
+} from "../../(aux)/picker/ProductQuantityDialog";
+import { api, wenderApi } from "../../../api";
 import {
   ProductItemType,
   VendingMachineItemType,
   WarehouseItemType,
 } from "../../../atoms/app";
-import React, { FC, useCallback, useMemo, useState } from "react";
 import MachinePickerModal from "../../../components/MachinePickerModal";
-import { useQuery } from "react-query";
-import { api, wenderApi } from "../../../api";
 import {
   useCategoriesState,
   useProductsState,
   useWarehousesState,
 } from "../../../hooks/appState";
-import ProductQuantityDialog, {
-  ProductItem,
-} from "../../(aux)/picker/ProductQuantityDialog";
+import { useUser } from "../../../hooks/useUserInfo";
 import { db, serverTimestamp } from "../../../utils/firebase";
 import ProductPicker from "../../admin/(aux)/ProductPicker";
-import { useUser } from "../../../hooks/useUserInfo";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface ProductItemProps {
   item: ProductItem;
@@ -85,7 +86,7 @@ const ProductListItem = React.memo<ProductItemProps>(
         onPress={onPress}
       />
     );
-  }
+  },
 );
 
 const IndexScreen = () => {
@@ -127,8 +128,8 @@ const IndexScreen = () => {
     queryFn: async () => {
       const res = await Promise.all(
         machineIds.map(({ _docID }) =>
-          wenderApi.get(`/liveStatusRefill/machineInventory/${_docID}`)
-        )
+          wenderApi.get(`/liveStatusRefill/machineInventory/${_docID}`),
+        ),
       );
       const products = res.flatMap(({ data }) => {
         return data.data[0].rows_details;
@@ -169,25 +170,31 @@ const IndexScreen = () => {
       data: ProductItem[];
     }[] = [];
 
-    const productsMap = _products.reduce((acc, item) => {
-      acc[item.product_id] = item;
-      return acc;
-    }, {} as Record<string, ProductItemType>);
+    const productsMap = _products.reduce(
+      (acc, item) => {
+        acc[item.product_id] = item;
+        return acc;
+      },
+      {} as Record<string, ProductItemType>,
+    );
 
-    const productCategoryMap = allProducts.reduce((acc, item) => {
-      const _p = productsMap[item.product_id];
-      if (!_p) return acc;
+    const productCategoryMap = allProducts.reduce(
+      (acc, item) => {
+        const _p = productsMap[item.product_id];
+        if (!_p) return acc;
 
-      const categoryName =
-        categories[_p.category_id]?.category_name ?? "Uncategorized";
+        const categoryName =
+          categories[_p.category_id]?.category_name ?? "Uncategorized";
 
-      if (!acc[categoryName]) {
-        acc[categoryName] = [];
-      }
+        if (!acc[categoryName]) {
+          acc[categoryName] = [];
+        }
 
-      acc[categoryName].push(item);
-      return acc;
-    }, {} as Record<string, ProductItem[]>);
+        acc[categoryName].push(item);
+        return acc;
+      },
+      {} as Record<string, ProductItem[]>,
+    );
 
     Object.entries(productCategoryMap).forEach(([key, value]) => {
       result.push({
@@ -199,7 +206,7 @@ const IndexScreen = () => {
     return result.sort((a, b) => {
       return a.title.localeCompare(b.title);
     });
-  }, [allProducts, categories]);
+  }, [_products, allProducts, categories]);
 
   const handlePickerDismiss = useCallback(() => {
     setPickerVisible(false);
@@ -220,7 +227,7 @@ const IndexScreen = () => {
         product.total_units - product.left_units
       );
     },
-    [productsQuantity]
+    [productsQuantity],
   );
 
   const handleDialogDismiss = useCallback(() => {
@@ -234,13 +241,13 @@ const IndexScreen = () => {
     if (!idToken) {
       return Alert.alert(
         "Error",
-        "idToken not found, please reload the app, and try again."
+        "idToken not found, please reload the app, and try again.",
       );
     }
 
     allProducts.forEach((item) => {
       const qty = getProductQuantity(item);
-      if (qty != 0) {
+      if (qty !== 0) {
         products[item.product_id] = qty;
       }
     });
@@ -256,10 +263,10 @@ const IndexScreen = () => {
     });
 
     const WarehouseProductsCol = db.collection(
-      `WarehouseStorage/${selectedWareHouse?._docID || "[__5xx__]"}/products`
+      `WarehouseStorage/${selectedWareHouse?._docID || "[__5xx__]"}/products`,
     );
     const RefillerStorageCol = db.collection(
-      `RefillerStorage/${user?.uid || "[__5xx__]"}/products`
+      `RefillerStorage/${user?.uid || "[__5xx__]"}/products`,
     );
 
     try {
@@ -277,7 +284,7 @@ const IndexScreen = () => {
             increment: true,
           },
         ],
-        { headers: { Authorization: `Bearer ${idToken}` } }
+        { headers: { Authorization: `Bearer ${idToken}` } },
       );
 
       await batch.commit();
@@ -289,7 +296,6 @@ const IndexScreen = () => {
   }, [
     allProducts,
     getProductQuantity,
-    productsQuantity,
     selectedWareHouse?._docID,
     user?.idTokenResult?.token,
     user?.uid,
@@ -297,7 +303,7 @@ const IndexScreen = () => {
 
   const handleSubmit = useCallback(() => {
     const uncheckedProducts = allProducts.filter(
-      (item) => !checkedProducts.includes(item.product_id)
+      (item) => !checkedProducts.includes(item.product_id),
     );
 
     const uncheckedProductsQuantity = uncheckedProducts
@@ -308,7 +314,7 @@ const IndexScreen = () => {
       return Alert.alert(
         "Unchecked products",
         `You have ${uncheckedProductsQuantity.length} unchecked products.`,
-        [{ text: "Cancel", style: "cancel" }]
+        [{ text: "Cancel", style: "cancel" }],
       );
     }
 
@@ -340,7 +346,7 @@ const IndexScreen = () => {
           },
         },
       ],
-      { cancelable: false }
+      { cancelable: false },
     );
   }, [
     allProducts,
@@ -384,10 +390,10 @@ const IndexScreen = () => {
               }));
             },
           },
-        ]
+        ],
       );
     },
-    [setProductsQuantity]
+    [setProductsQuantity],
   );
 
   const handleAddNewProduct = useCallback(
@@ -410,7 +416,7 @@ const IndexScreen = () => {
       setProductPickerVisible(false);
       setSelectedProduct(newProduct);
     },
-    [setNewProducts]
+    [setNewProducts],
   );
 
   return (
@@ -450,32 +456,6 @@ const IndexScreen = () => {
         </Chip>
       </View>
 
-      {/* <FlatList
-        data={allProducts}
-        keyExtractor={(item) => `${item.product_id}`}
-        renderItem={({ item }) => {
-          const qty = getProductQuantity(item);
-          const isChecked = checkedProducts.includes(item.product_id);
-
-          return (
-            <ProductListItem
-              item={item}
-              checked={isChecked}
-              qty={qty}
-              onEditQuantityPress={() => setSelectedProduct(item)}
-              onPress={() => handleToggleCheckedProduct(item.product_id)}
-              onLongPress={() => emptyProduct(item)}
-            />
-          );
-        }}
-        refreshing={isLoadingTrayProducts}
-        ListFooterComponent={() => <View style={{ height: 80 }} />}
-        onRefresh={() => {
-          // refetch();
-          refetchTrayProducts();
-        }}
-      /> */}
-
       <SectionList
         sections={groupedProducts}
         keyExtractor={(item) => `${item.product_id}`}
@@ -502,10 +482,7 @@ const IndexScreen = () => {
         )}
         refreshing={isLoadingTrayProducts}
         ListFooterComponent={() => <View style={{ height: 80 }} />}
-        onRefresh={() => {
-          // refetch();
-          refetchTrayProducts();
-        }}
+        onRefresh={refetchTrayProducts}
       />
 
       <View style={styles.actionBar}>
@@ -555,7 +532,7 @@ const IndexScreen = () => {
       <ProductQuantityDialog
         selectedProduct={selectedProduct}
         value={getProductQuantity(
-          selectedProduct ?? ({} as ProductItem)
+          selectedProduct ?? ({} as ProductItem),
         ).toString()}
         onDismiss={handleDialogDismiss}
         onSubmit={(quantity) => {

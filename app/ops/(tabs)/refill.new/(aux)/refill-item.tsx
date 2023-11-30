@@ -1,17 +1,17 @@
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { FC, memo, useCallback, useRef } from "react";
+import { Alert, View } from "react-native";
+import Swipeable from "react-native-gesture-handler/Swipeable";
 import {
-  Button,
   List,
   ProgressBar,
   Text,
   TouchableRipple,
   useTheme,
 } from "react-native-paper";
+
 import { ProductItem } from "../../../../(aux)/picker/ProductQuantityDialog";
-import React, { FC, useCallback, useMemo, useRef } from "react";
-import { Alert, View } from "react-native";
-import Swipeable from "react-native-gesture-handler/Swipeable";
 import { formatPrice } from "../../../../../utils/currency";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface StepperInputProps {
   value: string;
@@ -31,14 +31,14 @@ const StepperInput: FC<StepperInputProps> = ({
 
     if (max && val > max) return;
     onChange(val.toString());
-  }, [value]);
+  }, [max, onChange, value]);
 
   const handleDecrement = useCallback(() => {
     const val = Number(value) - 1;
 
     if (val < min) return;
     onChange(val.toString());
-  }, [value]);
+  }, [min, onChange, value]);
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -88,17 +88,17 @@ interface RefillItemProps {
   onPressEdit: (item: ProductItem) => void;
 }
 
-const RefillItem: FC<RefillItemProps> = React.memo(
+const RefillItem: FC<RefillItemProps> = memo(
   ({ item, onChange, onPressEdit }) => {
     const theme = useTheme();
     const swipeableRef = useRef<Swipeable>(null);
 
-    const handleQuantityChange = useCallback((qty: string) => {
-      onChange({
-        ...item,
-        left_units: Number(qty),
-      });
-    }, []);
+    const handleQuantityChange = useCallback(
+      (qty: string) => {
+        onChange({ ...item, left_units: Number(qty) });
+      },
+      [item, onChange],
+    );
 
     const handleEmpty = useCallback(() => {
       swipeableRef.current?.close();
@@ -117,9 +117,9 @@ const RefillItem: FC<RefillItemProps> = React.memo(
               handleQuantityChange("0");
             },
           },
-        ]
+        ],
       );
-    }, [handleQuantityChange]);
+    }, [handleQuantityChange, item.product_name]);
 
     return (
       <Swipeable
@@ -161,11 +161,7 @@ const RefillItem: FC<RefillItemProps> = React.memo(
             paddingHorizontal: 8,
           }}
         >
-          <View
-            style={{
-              backgroundColor: "#ffffff",
-            }}
-          >
+          <View style={{ backgroundColor: "#ffffff" }}>
             <View
               style={{
                 padding: 16,
@@ -175,20 +171,10 @@ const RefillItem: FC<RefillItemProps> = React.memo(
               }}
             >
               <View>
-                <Text
-                  style={{
-                    fontSize: 24,
-                    color: "#00000080",
-                  }}
-                >
+                <Text style={{ fontSize: 24, color: "#00000080" }}>
                   {item.show_pos}
                 </Text>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "bold",
-                  }}
-                >
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
                   {item.product_name}
                 </Text>
                 <Text>{formatPrice(item.product_price)}</Text>
@@ -239,14 +225,6 @@ const RefillItem: FC<RefillItemProps> = React.memo(
               }}
             >
               <>
-                {/* <Text
-                style={{
-                  paddingVertical: 4,
-                  color: theme.colors.primary,
-                }}
-              >
-                Change
-              </Text> */}
                 <Icon
                   name="pencil-box-outline"
                   size={24}
@@ -264,7 +242,7 @@ const RefillItem: FC<RefillItemProps> = React.memo(
         </View>
       </Swipeable>
     );
-  }
+  },
 );
 
 export default RefillItem;

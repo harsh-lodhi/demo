@@ -178,6 +178,7 @@ const ProductPicker: FC<ProductPickerProps> = ({
         sections={groupedProducts}
         keyExtractor={(item) => item.product_id.toString()}
         ref={sectionList}
+        windowSize={10}
         renderItem={({ item }) => {
           return (
             <ProductItem product={item} onPress={() => onSelectProduct(item)} />

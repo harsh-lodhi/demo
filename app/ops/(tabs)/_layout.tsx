@@ -1,5 +1,5 @@
-import { Tabs } from "expo-router";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { Tabs } from "expo-router";
 
 const OpsLayout = () => {
   return (
@@ -58,7 +58,7 @@ const OpsLayout = () => {
       <Tabs.Screen
         name="refill.new"
         options={{
-          href: null,
+          // href: null,
           headerShown: false,
           title: "Refill",
           tabBarLabel: "Refill",

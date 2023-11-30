@@ -1,14 +1,15 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import { Animated, FlatList, SectionList, View } from "react-native";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { FC, useCallback, useRef, useState } from "react";
+import { Alert, FlatList, SectionList, View } from "react-native";
 import { Button, Text, TouchableRipple } from "react-native-paper";
 import { useQuery } from "react-query";
-import { wenderApi } from "../../../../api";
-import Loader from "../../../../components/Loader/Loader";
-import { ProductItem } from "../../../(aux)/picker/ProductQuantityDialog";
+
 import RefillItem from "./(aux)/refill-item";
-import { FC, useCallback, useRef, useState } from "react";
-import ProductPicker from "../../../admin/(aux)/ProductPicker";
+import { ProductItem } from "../../../(aux)/picker/ProductQuantityDialog";
+import { wenderApi } from "../../../../api";
 import { ProductItemType } from "../../../../atoms/app";
+import Loader from "../../../../components/Loader/Loader";
+import ProductPicker from "../../../admin/(aux)/ProductPicker";
 
 interface RefillMachineScreenProps {
   onSubmit: () => void;
@@ -29,52 +30,38 @@ const ScreenOptions: FC<RefillMachineScreenProps> = ({ onSubmit }) => (
 
 const RefillMachineScreen = () => {
   const params = useLocalSearchParams();
+  const router = useRouter();
   const [changedItems, setChangedItems] = useState<Record<string, ProductItem>>(
-    {}
+    {},
   );
   const [itemToEdit, setItemToEdit] = useState<ProductItem | null>(null);
-
   const sectionList = useRef<SectionList>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const {
-    isLoading,
-    data = [],
-    refetch,
-  } = useQuery({
+  const { isLoading, data = [] } = useQuery({
     queryKey: ["PickTrayProducts", params.machine_id],
     queryFn: async () => {
       const res = await wenderApi.get(
-        `/liveStatusRefill/machineInventory/${params.machine_id}`
+        `/liveStatusRefill/machineInventory/${params.machine_id}`,
       );
       const data = res.data.data[0].rows_details as ProductItem[];
-
-      const result: {
-        title: string;
-        data: ProductItem[];
-      }[] = [];
-
+      const result: { title: string; data: ProductItem[] }[] = [];
       data.forEach((v) => {
         const tray = v.pos[0] as unknown as number;
         if (!result[tray]) {
-          result[tray] = {
-            title: `${tray}`,
-            data: [],
-          };
+          result[tray] = { title: `${tray}`, data: [] };
         }
-
         result[tray].data.push(v);
       });
 
       return result.filter((v) => v);
     },
     enabled: !!params.machine_id || typeof params.machine_id !== "string",
+    refetchOnMount: true,
   });
 
   const handleItemChange = useCallback((item: ProductItem) => {
-    setChangedItems((prev) => ({
-      ...prev,
-      [item.pos]: item,
-    }));
+    setChangedItems((prev) => ({ ...prev, [item.pos]: item }));
   }, []);
 
   const handleProductChange = useCallback(
@@ -96,17 +83,67 @@ const RefillMachineScreen = () => {
 
       setItemToEdit(null);
     },
-    [itemToEdit?.product_id]
+    [itemToEdit],
   );
 
   const handleSubmit = useCallback(async () => {
+    const allChangedItems = Object.values(changedItems);
+    const totalChangedItems = allChangedItems.length;
+    if (!totalChangedItems) {
+      Alert.alert(
+        "Empty",
+        "You haven't changed anything. Please change something and try again.",
+      );
+      return;
+    }
+
+    const allItems = data.flatMap((v) => {
+      return v.data.map((i) => changedItems[i.pos] || i);
+    });
+
+    const totalAmount = allItems.reduce((acc, v) => {
+      return acc + v.product_price * v.left_units;
+    }, 0);
+
+    try {
+      setSubmitting(true);
+
+      await wenderApi.post("/refiller-app/updateMachineProducts", {
+        items: allChangedItems.map((item) => ({
+          left_units: item.left_units,
+          new_price: item.product_price,
+          pos: item.pos,
+          product_id: item.product_id,
+          show_pos: item.show_pos,
+        })),
+        machine_id: params.machine_id,
+        total_amount: `${totalAmount}`,
+        warehouse_id: "",
+      });
+
+      Alert.alert("Success", "Machine has been refilled successfully.");
+
+      // Goback
+      router.back();
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.message ??
+          "Something went wrong. Please try again later or contact support.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+
+    console.log(JSON.stringify(allItems, null, 2));
+    console.log("totalAmount", totalAmount);
     console.log("changedItems", JSON.stringify(changedItems, null, 2));
-  }, [changedItems]);
+  }, [changedItems, data, params.machine_id, router]);
 
   return (
     <>
       <ScreenOptions onSubmit={handleSubmit} />
-      <Loader visible={isLoading} />
+      <Loader visible={isLoading || submitting} />
 
       <FlatList
         horizontal
@@ -120,23 +157,14 @@ const RefillMachineScreen = () => {
                 itemIndex: 1,
               });
             }}
-            style={{
-              backgroundColor: "#0bbf64",
-            }}
+            style={{ backgroundColor: "#0bbf64" }}
           >
-            <View
-              style={{
-                padding: 4,
-              }}
-            >
+            <View style={{ padding: 4 }}>
               <Text
                 style={{
-                  // backgroundColor: theme.colors.primary,
-                  // color: theme.colors.onPrimary,
                   paddingHorizontal: 16,
                   paddingVertical: 4,
                   borderRadius: 4,
-                  // elevation: 2,
                 }}
               >
                 {item.title}
@@ -151,7 +179,6 @@ const RefillMachineScreen = () => {
             style={{
               paddingHorizontal: 8,
               height: 33,
-              // backgroundColor: "#333",
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -164,28 +191,28 @@ const RefillMachineScreen = () => {
         }}
       />
 
-      <Animated.SectionList
+      <SectionList
         ref={sectionList}
-        stickySectionHeadersEnabled={true}
+        stickySectionHeadersEnabled
         sections={data}
+        windowSize={6}
+        // getItemLayout={(data, index) => {
+        //   console.log(data?.[index]);
+
+        //   return {
+        //     length: 80,
+        //     offset: 80 * index,
+        //     index,
+        //   };
+        // }}
         keyExtractor={(item) => item.pos}
         renderItem={({ item }) => (
           <RefillItem
             item={changedItems[item.pos] || item}
             onChange={handleItemChange}
-            onPressEdit={(item) => {
-              setItemToEdit(item);
-            }}
+            onPressEdit={setItemToEdit}
           />
         )}
-        onViewableItemsChanged={({ viewableItems }) => {
-          // if (!viewableItems.length) return;
-          // console.log(viewableItems);
-          // sectionList.current?.scrollToLocation({
-          //   sectionIndex: index,
-          //   itemIndex: 1,
-          // });
-        }}
         renderSectionHeader={({ section: { title } }) => {
           return (
             <View
@@ -218,12 +245,8 @@ const RefillMachineScreen = () => {
 
       <ProductPicker
         visible={!!itemToEdit}
-        onDismiss={() => {
-          // setItemToEdit(null)
-        }}
-        onSelectProduct={(item) => {
-          handleProductChange(item);
-        }}
+        onDismiss={() => setItemToEdit(null)}
+        onSelectProduct={handleProductChange}
         disabledItems={
           itemToEdit?.product_id ? [`${itemToEdit.product_id}`] : undefined
         }
