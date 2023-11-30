@@ -1,3 +1,5 @@
+import { ProductItemType } from "atoms/app";
+import { useCategoriesState, useProductsState } from "hooks/appState";
 import React, { FC, useEffect, useMemo, useRef, useState } from "react";
 import {
   BackHandler,
@@ -13,14 +15,11 @@ import {
   FAB,
   IconButton,
   List,
-  Menu,
   Text,
   TextInput,
 } from "react-native-paper";
-import { useCategoriesState, useProductsState } from "../../../hooks/appState";
-import { DEFAULT_PRODUCT_IMAGE } from "../../../constants";
-import { formatPrice } from "../../../utils/currency";
-import { ProductItemType } from "../../../atoms/app";
+import { DEFAULT_PRODUCT_IMAGE } from "utils/constants";
+import { formatPrice } from "utils/currency";
 
 interface ProductListProps {
   product: ProductItemType;

@@ -1,7 +1,7 @@
+import fbAuth from "@react-native-firebase/auth";
 import firestore, {
   FirebaseFirestoreTypes,
 } from "@react-native-firebase/firestore";
-import fbAuth from "@react-native-firebase/auth";
 
 export const db = firestore();
 export const auth = fbAuth();
@@ -52,7 +52,7 @@ export const updateProductQuantity = async ({
       const ref = col.doc(id);
       const doc = await ref.get();
       return { id, ref, doc, data: doc.data() };
-    })
+    }),
   );
 
   productsData.forEach(({ id, ref, doc, data }) => {
@@ -86,14 +86,14 @@ export const updateProductQuantity = async ({
       operation: expectedFinalQuantity === 0 ? "delete" : "update",
     };
 
-    if (expectedFinalQuantity == 0) {
+    if (expectedFinalQuantity === 0) {
       batch.delete(ref);
       return;
     }
 
     batch.update(ref, {
       quantity: firestore.FieldValue.increment(
-        increment ? products[id] : products[id] * -1
+        increment ? products[id] : products[id] * -1,
       ),
       updatedAt: serverTimestamp(),
     });
@@ -151,7 +151,7 @@ export const updateProductQuantity = async ({
       updatedAt: serverTimestamp(),
       updatedBy: auth.currentUser?.uid,
     },
-    { merge: true }
+    { merge: true },
   );
 
   const auditRef = productQuantityAuditCol.collection("Entries").doc();

@@ -1,3 +1,7 @@
+import { WarehouseItemType } from "atoms/app";
+import { router } from "expo-router";
+import { useWarehousesState } from "hooks/appState";
+import { useCallback, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import {
   Button,
@@ -7,19 +11,15 @@ import {
   Portal,
   TextInput,
 } from "react-native-paper";
-import { useWarehousesState } from "../../../hooks/appState";
-import { useCallback, useState } from "react";
-import { db, serverTimestamp } from "../../../utils/firebase";
-import { DBCollection, Storage } from "../../../types/common";
-import { router } from "expo-router";
-import { WarehouseItemType } from "../../../atoms/app";
+import { DBCollection, Storage } from "types/common";
+import { db, serverTimestamp } from "utils/firebase";
 
 const WarehouseScreen = () => {
   const [warehouses] = useWarehousesState();
   const [showAddWarehouse, setShowAddWarehouse] = useState(false);
   const [newName, setNewName] = useState("");
   const [itemIDToEdit, setItemIDToEdit] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   const handleDialogDismiss = useCallback(() => {
@@ -35,19 +35,22 @@ const WarehouseScreen = () => {
     });
 
     handleDialogDismiss();
-  }, [newName]);
+  }, [handleDialogDismiss, itemIDToEdit, newName]);
 
-  const handleEditPress = useCallback(async (id: string) => {
-    const warehouse = warehouses.find((item) => item._docID == id);
+  const handleEditPress = useCallback(
+    async (id: string) => {
+      const warehouse = warehouses.find((item) => item._docID === id);
 
-    if (!warehouse) {
-      return;
-    }
+      if (!warehouse) {
+        return;
+      }
 
-    setNewName(warehouse.name);
-    setShowAddWarehouse(true);
-    setItemIDToEdit(id);
-  }, []);
+      setNewName(warehouse.name);
+      setShowAddWarehouse(true);
+      setItemIDToEdit(id);
+    },
+    [warehouses],
+  );
 
   const handleItemPress = useCallback((item: WarehouseItemType) => {
     router.push({

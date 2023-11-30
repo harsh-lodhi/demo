@@ -1,8 +1,8 @@
-import { useRecoilState } from "recoil";
-import { ProductItemType, categoriesState, productsState } from "../atoms/app";
+import { wenderApi } from "api";
+import { ProductItemType, categoriesState, productsState } from "atoms/app";
 import { useQuery } from "react-query";
-import { wenderApi } from "../api";
-import { DBCollection } from "../types/common";
+import { useRecoilState } from "recoil";
+import { DBCollection } from "types/common";
 
 export const useProducts = () => {
   const [ps, setProducts] = useRecoilState(productsState);
@@ -21,7 +21,7 @@ export const useProducts = () => {
       const categoriesRes = await wenderApi.get("/products/categories");
 
       const items: ProductItemType[] = res.data.data.map?.(
-        (p: ProductItemType) => ({ ...p, _docID: p.product_id })
+        (p: ProductItemType) => ({ ...p, _docID: p.product_id }),
       );
 
       return { items, categories: categoriesRes.data.data.categories };
@@ -32,6 +32,6 @@ export const useProducts = () => {
         setProducts(data.items);
         setCategories(data.categories);
       },
-    }
+    },
   );
 };

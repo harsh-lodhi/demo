@@ -1,12 +1,12 @@
+import ManageStorageStock from "app/admin/(aux)/ManageStorageStock";
+import RefillerInfo from "app/admin/(aux)/RefillerInfo";
+import VendingMachineInfo from "app/admin/(aux)/VendingMachineInfo";
+import WarehouseInfo from "app/admin/(aux)/WarehouseInfo";
 import { useLocalSearchParams } from "expo-router";
+import React from "react";
 import { View } from "react-native";
 import { Text } from "react-native-paper";
-import VendingMachineInfo from "./(aux)/VendingMachineInfo";
-import { Storage } from "../../types/common";
-import React from "react";
-import ManageStorageStock from "./(aux)/ManageStorageStock";
-import RefillerInfo from "./(aux)/RefillerInfo";
-import WarehouseInfo from "./(aux)/WarehouseInfo";
+import { Storage } from "types/common";
 
 interface StorageInfoProps {
   storageName: Storage;
@@ -17,22 +17,22 @@ export const StorageInfo: React.FC<StorageInfoProps> = ({
   storageName,
   id,
 }) => {
-  if (storageName == Storage.VENDING_MACHINE) {
+  if (storageName === Storage.VENDING_MACHINE) {
     return <VendingMachineInfo id={id} />;
   }
 
-  if (storageName == Storage.REFILLER) {
+  if (storageName === Storage.REFILLER) {
     return <RefillerInfo id={id} />;
   }
 
-  if (storageName == Storage.WAREHOUSE) {
+  if (storageName === Storage.WAREHOUSE) {
     return <WarehouseInfo id={id} />;
   }
 
   return null;
 };
 
-const storage = () => {
+const StorageScreen = () => {
   const params = useLocalSearchParams<{
     storageName: Storage;
     storageLabel: string;
@@ -62,4 +62,4 @@ const storage = () => {
   );
 };
 
-export default storage;
+export default StorageScreen;

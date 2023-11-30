@@ -1,3 +1,5 @@
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { useCallback, useMemo, useState } from "react";
 import { Alert, FlatList, View } from "react-native";
 import {
   Button,
@@ -11,9 +13,8 @@ import {
   TextInput,
 } from "react-native-paper";
 import { useQuery } from "react-query";
+
 import { functionApi } from "../../../../api";
-import { useCallback, useMemo, useState } from "react";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface CustomClaimsType {
   role?: "admin";
@@ -42,7 +43,7 @@ interface UserItem {
       email: string;
       photoURL: string;
       providerId: string;
-    }
+    },
   ];
 }
 
@@ -66,13 +67,18 @@ const TeamScreen = () => {
 
   const filteredData = useMemo(() => {
     return data.filter(
-      (item) => item.disabled === false || showDisabled === true
+      (item) => item.disabled === false || showDisabled === true,
     );
   }, [data, showDisabled]);
 
   const handleUserPress = useCallback((user: UserItem) => {
     setUserToEdit(user);
     setClaimData(user.customClaims || {});
+  }, []);
+
+  const handleDialogDismiss = useCallback(() => {
+    setUserToEdit(null);
+    setClaimData({});
   }, []);
 
   const handleSaveClaim = useCallback(async () => {
@@ -96,12 +102,7 @@ const TeamScreen = () => {
     handleDialogDismiss();
 
     refetch();
-  }, [userToEdit, claimData, refetch]);
-
-  const handleDialogDismiss = useCallback(() => {
-    setUserToEdit(null);
-    setClaimData({});
-  }, []);
+  }, [userToEdit, handleDialogDismiss, refetch, claimData]);
 
   return (
     <>

@@ -1,10 +1,10 @@
+import { VendingMachineItemType } from "atoms/app";
+import { router } from "expo-router";
+import { useVendingMachinesState } from "hooks/appState";
+import { useCallback } from "react";
 import { FlatList } from "react-native";
 import { Divider, List, Text } from "react-native-paper";
-import { useVendingMachinesState } from "../../../hooks/appState";
-import { useCallback } from "react";
-import { VendingMachineItemType } from "../../../atoms/app";
-import { router } from "expo-router";
-import { Storage } from "../../../types/common";
+import { Storage } from "types/common";
 
 const MachineScreen = () => {
   const [vendingMachines] = useVendingMachinesState();

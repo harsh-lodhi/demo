@@ -1,12 +1,12 @@
+import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
+import { functionApi } from "api";
+import { UserType } from "atoms/auth";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Alert, FlatList, View } from "react-native";
+import { useMemo } from "react";
+import { FlatList, View } from "react-native";
 import { List, Text } from "react-native-paper";
 import { useQuery } from "react-query";
-import { db } from "../../../../utils/firebase";
-import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
-import { functionApi } from "../../../../api";
-import { UserType } from "../../../../atoms/auth";
-import { useMemo } from "react";
+import { db } from "utils/firebase";
 
 interface LogItem {
   _id: string;
@@ -38,7 +38,6 @@ const LogView = () => {
     data: logs,
     isLoading,
     refetch,
-    error,
   } = useQuery({
     queryKey: ["logs", searchParams.type],
     queryFn: async () => {
@@ -47,8 +46,8 @@ const LogView = () => {
       return db
         .collection(collectionName)
         .orderBy(
-          collectionName == "picklog" ? "createdAt" : "created_at",
-          "desc"
+          collectionName === "picklog" ? "createdAt" : "created_at",
+          "desc",
         )
         .limit(10)
         .get()
@@ -116,7 +115,7 @@ const LogView = () => {
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => {
                 router.push(
-                  `admin/(tabs)/more/log-details?col=${searchParams.type}&id=${item._id}`
+                  `admin/(tabs)/more/log-details?col=${searchParams.type}&id=${item._id}`,
                 );
               }}
             />

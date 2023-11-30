@@ -1,15 +1,12 @@
+import { ProductItemType } from "atoms/app";
 import { Stack, useLocalSearchParams } from "expo-router";
+import { useProductsState, useWarehousesState } from "hooks/appState";
+import { useMemo } from "react";
 import { FlatList, View } from "react-native";
 import { Divider, List, Text } from "react-native-paper";
 import { useQuery } from "react-query";
-import { db } from "../../../../utils/firebase";
-import {
-  useProductsState,
-  useWarehousesState,
-} from "../../../../hooks/appState";
-import { ProductItemType } from "../../../../atoms/app";
-import { useMemo } from "react";
-import { DEFAULT_PRODUCT_IMAGE } from "../../../../constants";
+import { DEFAULT_PRODUCT_IMAGE } from "utils/constants";
+import { db } from "utils/firebase";
 
 const ScreenOptions = () => {
   return (

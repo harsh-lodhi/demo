@@ -1,20 +1,20 @@
-import { FlatList, ToastAndroid, View } from "react-native";
-import { Button, IconButton, List, Text } from "react-native-paper";
-import { useQuery } from "react-query";
-import { db } from "../../../../utils/firebase";
-import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
-import { functionApi } from "../../../../api";
-import { UserType } from "../../../../atoms/auth";
-import { useCallback, useMemo, useState } from "react";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
+import { functionApi } from "api";
+import { ProductItemType } from "atoms/app";
+import { UserType } from "atoms/auth";
 import { Stack } from "expo-router";
-import { convertToCSV, shareFile, writeToFile } from "../../../../utils/common";
 import * as Sharing from "expo-sharing";
-import { useProductsState } from "../../../../hooks/appState";
-import { ProductItemType } from "../../../../atoms/app";
-import { formatPrice } from "../../../../utils/currency";
+import { useProductsState } from "hooks/appState";
+import { useCallback, useMemo, useState } from "react";
+import { FlatList, ToastAndroid, View } from "react-native";
+import { Button, IconButton, List, Text } from "react-native-paper";
+import { useQuery } from "react-query";
+import { convertToCSV, writeToFile } from "utils/common";
+import { formatPrice } from "utils/currency";
+import { db } from "utils/firebase";
 
 interface ProductMissmatchItem {
   _id: string;
@@ -116,7 +116,7 @@ const ProductMissmatch = () => {
       {
         missed: 0,
         extra: 0,
-      }
+      },
     );
   }, [data]);
 
@@ -136,9 +136,9 @@ const ProductMissmatch = () => {
       {
         loss: 0,
         refund: 0,
-      }
+      },
     );
-  }, [data]);
+  }, [data, productsObj]);
 
   const onChange = useCallback(
     (event: DateTimePickerEvent, selectedDate?: Date) => {
@@ -151,14 +151,14 @@ const ProductMissmatch = () => {
         }));
       }
 
-      if (event.type == "set") {
+      if (event.type === "set") {
         setFilter((prev) => ({
           ...prev,
           [showDatePicker === "Start" ? "start" : "end"]: selectedDate,
         }));
       }
     },
-    [showDatePicker]
+    [showDatePicker],
   );
 
   const handleDownload = useCallback(async () => {

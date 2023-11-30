@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import useListenersInit from "../../hooks/useListnersInit";
+import useListenersInit from "hooks/useListnersInit";
 
 const AppLayout = () => {
   useListenersInit();

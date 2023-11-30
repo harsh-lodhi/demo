@@ -1,5 +1,9 @@
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
+import { ProductItemType } from "atoms/app";
+import { Tabs } from "expo-router";
+import { useProductsState } from "hooks/appState";
 import React, { FC, useCallback, useEffect, useMemo, useState } from "react";
-import { Storage } from "../../../types/common";
 import { Alert, FlatList, ToastAndroid, View } from "react-native";
 import {
   Button,
@@ -12,16 +16,13 @@ import {
   Text,
   TextInput,
 } from "react-native-paper";
-import { ProductItemType } from "../../../atoms/app";
-import { db, increment } from "../../../utils/firebase";
-import { useProductsState } from "../../../hooks/appState";
-import { formatPrice } from "../../../utils/currency";
-import { listToDocsObj } from "../../../utils/common";
-import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
-import { DEFAULT_PRODUCT_IMAGE } from "../../../constants";
-import { Tabs } from "expo-router";
+import { Storage } from "types/common";
+import { listToDocsObj } from "utils/common";
+import { DEFAULT_PRODUCT_IMAGE } from "utils/constants";
+import { formatPrice } from "utils/currency";
+import { db, increment } from "utils/firebase";
+
 import ProductPicker from "./ProductPicker";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface _ProductType {
   product_ref: FirebaseFirestoreTypes.DocumentReference;
@@ -68,7 +69,7 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
     return () => {
       unsubs();
     };
-  }, [storageName]);
+  }, [id, storageName]);
 
   const allProductsObj: {
     [key: string]: ProductItemType;
@@ -101,13 +102,16 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
     });
   }, [products, allProductsObj, searchText, isSearching]);
 
-  const handleSelectProduct = useCallback((product_id: string) => {
-    setSelectedProduct({
-      id: product_id,
-      quantity: `${productsObj[product_id]?.quantity || ""}`,
-    });
-    setModalVisible(false);
-  }, []);
+  const handleSelectProduct = useCallback(
+    (product_id: string) => {
+      setSelectedProduct({
+        id: product_id,
+        quantity: `${productsObj[product_id]?.quantity || ""}`,
+      });
+      setModalVisible(false);
+    },
+    [productsObj],
+  );
 
   // const handleAddProduct = useCallback(async () => {
   //   if (!selectedProduct) return;
@@ -125,7 +129,7 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
 
   const handleSetProduct = useCallback(
     async (inc: boolean) => {
-      const v = parseInt(newQuantityChange);
+      const v = parseInt(newQuantityChange, 10);
       if (isNaN(v)) {
         Alert.alert("Invalid quantity");
         return;
@@ -142,7 +146,7 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
               product_ref: db.doc(`Products/${selectedProduct.id}`),
               quantity: increment(inc ? v : v * -1),
             },
-            { merge: true }
+            { merge: true },
           );
         setSelectedProduct(undefined);
         setNewQuantityChange("");
@@ -153,7 +157,7 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
         setSavingProduct(false);
       }
     },
-    [selectedProduct, newQuantityChange]
+    [newQuantityChange, selectedProduct, storageName, id],
   );
 
   return (
@@ -200,7 +204,7 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
             <TextInput.Icon
               icon="close-circle"
               onPress={() => {
-                if (searchText != "") {
+                if (searchText !== "") {
                   setSearchText("");
                 } else {
                   setIsSearching(false);

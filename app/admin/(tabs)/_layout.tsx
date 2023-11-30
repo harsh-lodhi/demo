@@ -1,5 +1,5 @@
-import { Tabs } from "expo-router";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { Tabs } from "expo-router";
 
 const Layout = () => {
   return (

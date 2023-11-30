@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 import { List } from "react-native-paper";
 
 const SettingsScreen = () => {

@@ -1,4 +1,5 @@
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { ProductItem } from "app/(aux)/picker/ProductQuantityDialog";
 import { FC, memo, useCallback, useRef } from "react";
 import { Alert, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
@@ -9,9 +10,7 @@ import {
   TouchableRipple,
   useTheme,
 } from "react-native-paper";
-
-import { ProductItem } from "../../../../(aux)/picker/ProductQuantityDialog";
-import { formatPrice } from "../../../../../utils/currency";
+import { formatPrice } from "utils/currency";
 
 interface StepperInputProps {
   value: string;

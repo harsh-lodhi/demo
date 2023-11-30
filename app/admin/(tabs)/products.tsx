@@ -1,3 +1,7 @@
+import ProductItem from "app/admin/(aux)/ProductItem";
+import { useProductsState } from "hooks/appState";
+import useProductsQuantity from "hooks/useProductsQuantity";
+import { useMemo, useState } from "react";
 import { FlatList } from "react-native";
 import {
   Dialog,
@@ -7,11 +11,7 @@ import {
   SegmentedButtons,
   Text,
 } from "react-native-paper";
-import { useProductsState } from "../../../hooks/appState";
-import ProductItem from "../(aux)/ProductItem";
-import { useMemo, useState } from "react";
-import useProductsQuantity from "../../../hooks/useProductsQuantity";
-import { Storage } from "../../../types/common";
+import { Storage } from "types/common";
 
 const getTotalQty = (data: {
   [storageType: string]: {
@@ -20,8 +20,8 @@ const getTotalQty = (data: {
 }) => {
   let totalQty = 0;
 
-  for (let storageType in data) {
-    for (let storageId in data[storageType]) {
+  for (const storageType in data) {
+    for (const storageId in data[storageType]) {
       totalQty += data[storageType][storageId];
     }
   }
@@ -41,14 +41,6 @@ const StockScreen = () => {
     "all" | "outOfStock" | "lowStock"
   >("all");
 
-  const [sort, setSort] = useState<{
-    by: "name" | "qty" | "price";
-    order: "asc" | "desc";
-  }>({
-    by: "name",
-    order: "asc",
-  });
-
   const productsQtyByStorage = useMemo(() => {
     const result: {
       [productId: string]: {
@@ -58,9 +50,9 @@ const StockScreen = () => {
       };
     } = {};
 
-    for (let storageType in productsQty.data) {
-      for (let storageId in productsQty.data[storageType as Storage]) {
-        for (let productId in productsQty.data[storageType as Storage][
+    for (const storageType in productsQty.data) {
+      for (const storageId in productsQty.data[storageType as Storage]) {
+        for (const productId in productsQty.data[storageType as Storage][
           storageId
         ]) {
           if (!result[productId]) {
@@ -85,7 +77,7 @@ const StockScreen = () => {
       ...product,
       ...getTotalQty(productsQtyByStorage[product.product_id]),
     }));
-  }, [productsQtyByStorage]);
+  }, [products, productsQtyByStorage]);
 
   const filteredProducts = useMemo(() => {
     // return all if no filter is applied
@@ -114,7 +106,7 @@ const StockScreen = () => {
         refreshing={productsQty.isLoading}
         onRefresh={productsQty.refetch}
         data={filteredProducts}
-        removeClippedSubviews={true}
+        removeClippedSubviews
         windowSize={10}
         renderItem={({ item }) => <ProductItem item={item} />}
         keyExtractor={(item) => item.product_id}

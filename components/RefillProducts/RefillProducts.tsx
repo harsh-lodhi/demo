@@ -1,10 +1,10 @@
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { wenderApi } from "api";
 import { FC, useCallback } from "react";
 import { FlatList, Modal, StyleSheet, View } from "react-native";
 import { Appbar, Button, Divider, List, Text } from "react-native-paper";
 import { useQuery } from "react-query";
-import { wenderApi } from "../../api";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import { db } from "../../utils/firebase";
+import { db } from "utils/firebase";
 
 interface RefillItem {
   after_price: number;
@@ -69,7 +69,7 @@ const RefillProductsModal: FC<RefillProductsProps> = ({
     }[] = [];
 
     data.items.forEach((item) => {
-      if (item.before_product_id == item.after_product_id) {
+      if (item.before_product_id === item.after_product_id) {
         result.push({
           product_id: item.before_product_id,
           quantity: item.after_quantity - item.before_quantity,
@@ -87,16 +87,19 @@ const RefillProductsModal: FC<RefillProductsProps> = ({
     });
 
     onSubmit(
-      result.reduce((acc, item) => {
-        if (acc[item.product_id]) {
-          acc[item.product_id] += item.quantity;
-        } else {
-          acc[item.product_id] = item.quantity;
-        }
-        return acc;
-      }, {} as Record<string, number>)
+      result.reduce(
+        (acc, item) => {
+          if (acc[item.product_id]) {
+            acc[item.product_id] += item.quantity;
+          } else {
+            acc[item.product_id] = item.quantity;
+          }
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
     );
-  }, [data]);
+  }, [data.items, onSubmit]);
 
   return (
     <Modal
@@ -152,15 +155,15 @@ const RefillProductsModal: FC<RefillProductsProps> = ({
                         changedQty === 0
                           ? "minus-box-outline"
                           : changedQty > 0
-                          ? "arrow-up-circle-outline"
-                          : "arrow-down-circle-outline"
+                            ? "arrow-up-circle-outline"
+                            : "arrow-down-circle-outline"
                       }
                       color={
                         changedQty === 0
                           ? "#ccc"
                           : changedQty > 0
-                          ? "green"
-                          : "red"
+                            ? "green"
+                            : "red"
                       }
                       size={16}
                     />

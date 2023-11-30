@@ -21,7 +21,7 @@ export const ButtonLink: React.FC<ButtonLinkProps> = ({
     } else {
       router.push(href);
     }
-  }, [href]);
+  }, [href, replace]);
 
   return (
     <Button {...props} onPress={handlePress}>

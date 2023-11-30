@@ -1,15 +1,15 @@
-import { Alert, StyleSheet, View } from "react-native";
-import { ActivityIndicator, Text } from "react-native-paper";
+import fbAuth from "@react-native-firebase/auth";
 import {
   GoogleSignin,
   GoogleSigninButton,
   User,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
-import { useEffect, useState } from "react";
-import { auth } from "../../utils/firebase";
-import fbAuth from "@react-native-firebase/auth";
 import * as Application from "expo-application";
+import { useEffect, useState } from "react";
+import { Alert, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Text } from "react-native-paper";
+import { auth } from "utils/firebase";
 
 const LoginScreen = () => {
   const [userInfo, setUserInfo] = useState<User | null>(null);
@@ -59,19 +59,19 @@ const LoginScreen = () => {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         Alert.alert(
           "Sign in cancelled",
-          "You have cancelled the sign in process"
+          "You have cancelled the sign in process",
         );
       } else if (error.code === statusCodes.IN_PROGRESS) {
         // operation (e.g. sign in) is in progress already
         Alert.alert(
           "Sign in in progress",
-          "You have already started the sign in process"
+          "You have already started the sign in process",
         );
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         // play services not available or outdated
         Alert.alert(
           "Play services not available",
-          "Google Play services are not available or outdated"
+          "Google Play services are not available or outdated",
         );
       } else {
         // some other error happened

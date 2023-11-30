@@ -1,8 +1,8 @@
-import { useRecoilState } from "recoil";
-import { WarehouseItemType, warehousesState } from "../atoms/app";
+import { WarehouseItemType, warehousesState } from "atoms/app";
 import { useEffect, useState } from "react";
-import { db } from "../utils/firebase";
-import { DBCollection } from "../types/common";
+import { useRecoilState } from "recoil";
+import { DBCollection } from "types/common";
+import { db } from "utils/firebase";
 
 export const useWarehouses = () => {
   const [warehouses, setWarehouses] = useRecoilState(warehousesState);
@@ -24,13 +24,13 @@ export const useWarehouses = () => {
       (err) => {
         console.log(err);
         setLoading(false);
-      }
+      },
     );
 
     return () => {
       unsubs();
     };
-  }, []);
+  }, [setWarehouses]);
 
   return { warehouses, loading };
 };

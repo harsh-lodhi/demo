@@ -48,7 +48,7 @@ const ProductListItem = React.memo<ProductItemProps>(
         style={{ opacity: qty > 0 ? 1 : 0.5 }}
         title={item.product_name}
         description={
-          item.total_units == 0
+          item.total_units === 0
             ? "New Item"
             : `Left: ${item.left_units} / Total: ${item.total_units}`
         }

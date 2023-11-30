@@ -1,18 +1,14 @@
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { wenderApi } from "api";
+import Loader from "components/Loader/Loader";
+import RefillProductsModal from "components/RefillProducts/RefillProducts";
+import { format } from "date-fns";
+import { useUser } from "hooks/useUserInfo";
 import { useCallback, useMemo, useState } from "react";
 import { Alert, FlatList, View } from "react-native";
 import { Divider, List, Text } from "react-native-paper";
-import { wenderApi } from "../../../api";
 import { useQuery } from "react-query";
-import { useUser } from "../../../hooks/useUserInfo";
-import RefillProductsModal from "../../../components/RefillProducts/RefillProducts";
-import {
-  db,
-  serverTimestamp,
-  updateProductQuantity,
-} from "../../../utils/firebase";
-import Loader from "../../../components/Loader/Loader";
-import { format } from "date-fns";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { db, serverTimestamp, updateProductQuantity } from "utils/firebase";
 
 function addDaysToDate(days: number, date = new Date()) {
   const result = new Date(date);
@@ -55,7 +51,7 @@ const RefillScreen = () => {
     let result = data;
     if (user?.claims?.role !== "admin") {
       result = data.filter(
-        (item) => item.refiller_id === user?.claims?.wenderId
+        (item) => item.refiller_id === user?.claims?.wenderId,
       );
     }
 
@@ -63,7 +59,7 @@ const RefillScreen = () => {
       ...item,
       created_at: new Date(item.created_at),
     }));
-  }, [data]);
+  }, [data, user?.claims?.role, user?.claims?.wenderId]);
 
   const confirmSubmit = useCallback(
     async (products: Record<string, number>) => {
@@ -93,7 +89,7 @@ const RefillScreen = () => {
         setSaving(false);
       }
     },
-    [selectedRefillId]
+    [selectedRefillId, user],
   );
 
   const handleSubmit = useCallback(
@@ -111,10 +107,10 @@ const RefillScreen = () => {
             onPress: () => confirmSubmit(products),
           },
         ],
-        { cancelable: false }
+        { cancelable: false },
       );
     },
-    [confirmSubmit]
+    [confirmSubmit],
   );
 
   return (

@@ -1,4 +1,5 @@
-import { Storage } from "../types/common";
+import { Storage } from "types/common";
+
 import { db } from "./firebase";
 
 interface ProductQuantityMap {
@@ -15,7 +16,7 @@ interface ProductQuantityInStorageMap {
 
 const getStorageProductQuantity = async (
   storageType: Storage,
-  storageId: string
+  storageId: string,
 ) => {
   const productsCol = db
     .collection(storageType)
@@ -34,7 +35,7 @@ const getStorageProductQuantity = async (
 
 export const fetchProductQuantity = async (
   storageType: Storage,
-  storages: { _docID: string }[]
+  storages: { _docID: string }[],
 ) => {
   const quantitiesPromises = storages.map(async (s) => {
     const quantity = await getStorageProductQuantity(storageType, s._docID);
@@ -50,7 +51,7 @@ export const fetchProductQuantity = async (
     },
     {
       [storageType]: {},
-    } as ProductQuantityInStorageMap
+    } as ProductQuantityInStorageMap,
   );
 
   return updateObject;

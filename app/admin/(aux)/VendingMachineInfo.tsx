@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
-import { VendingMachineItemType } from "../../../atoms/app";
-import { useVendingMachinesState } from "../../../hooks/appState";
-import { listToDocsObj } from "../../../utils/common";
+import { VendingMachineItemType } from "atoms/app";
 import { Stack } from "expo-router";
+import { useVendingMachinesState } from "hooks/appState";
+import React, { useMemo } from "react";
+import { listToDocsObj } from "utils/common";
 
 interface VendingMachineInfoProps {
   id: string;

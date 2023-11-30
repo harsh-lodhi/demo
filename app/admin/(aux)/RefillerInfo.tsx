@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
-import { TeamMemberItemType } from "../../../atoms/app";
-import { useTeamMembersState } from "../../../hooks/appState";
-import { listToDocsObj } from "../../../utils/common";
+import { TeamMemberItemType } from "atoms/app";
 import { Stack } from "expo-router";
+import { useTeamMembersState } from "hooks/appState";
+import React, { useMemo } from "react";
+import { listToDocsObj } from "utils/common";
 
 interface RefillerInfoProps {
   id: string;

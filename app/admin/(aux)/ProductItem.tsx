@@ -1,10 +1,10 @@
-import { Chip, List, Text } from "react-native-paper";
-import { ProductItemType } from "../../../atoms/app";
+import { ProductItemType } from "atoms/app";
 import { FC, ReactNode, memo } from "react";
-import { formatPrice } from "../../../utils/currency";
-import { DEFAULT_PRODUCT_IMAGE } from "../../../constants";
-import { Storage } from "../../../types/common";
 import { View } from "react-native";
+import { Chip, List, Text } from "react-native-paper";
+import { Storage } from "types/common";
+import { DEFAULT_PRODUCT_IMAGE } from "utils/constants";
+import { formatPrice } from "utils/currency";
 
 interface ProductItemProps {
   item: ProductItemType & {
@@ -35,13 +35,13 @@ const QtyChips = ({
 }: {
   data: ProductItemProps["item"]["storageQty"];
 }) => {
-  let chips: ReactNode[] = [];
+  const chips: ReactNode[] = [];
 
-  for (let storageType in data) {
+  for (const storageType in data) {
     let totalQty = 0;
-    let items: { label: string; value: number }[] = [];
+    const items: { label: string; value: number }[] = [];
 
-    for (let storageId in data[storageType]) {
+    for (const storageId in data[storageType]) {
       totalQty += data[storageType][storageId];
 
       items.push({
@@ -58,7 +58,7 @@ const QtyChips = ({
         compact
       >
         {totalQty}
-      </Chip>
+      </Chip>,
     );
   }
 

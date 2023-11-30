@@ -1,10 +1,10 @@
-import { useRecoilState } from "recoil";
-import { VendingMachineItemType, vendingMachinesState } from "../atoms/app";
+import { wenderApi } from "api";
+import { VendingMachineItemType, vendingMachinesState } from "atoms/app";
 import { useEffect } from "react";
-import { db } from "../utils/firebase";
 import { useQuery } from "react-query";
-import { wenderApi } from "../api";
-import { DBCollection } from "../types/common";
+import { useRecoilState } from "recoil";
+import { DBCollection } from "types/common";
+import { db } from "utils/firebase";
 
 export const useVendingMachines = () => {
   const [vendingMachines, setVendingMachines] =
@@ -24,7 +24,7 @@ export const useVendingMachines = () => {
     {
       enabled:
         vendingMachines.shouldRefetch || vendingMachines.items.length === 0,
-    }
+    },
   );
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export const useVendingMachines = () => {
           (p: VendingMachineItemType) => ({
             ...p,
             _docID: p.machine_id,
-          })
+          }),
         ),
         shouldRefetch: false,
       }));
@@ -52,7 +52,7 @@ export const useVendingMachines = () => {
       });
       batch.commit();
     }
-  }, [vendingMachinesRes?.data.data.machinesStatus]);
+  }, [setVendingMachines, vendingMachinesRes]);
 
   return { vendingMachines, isLoading, refetch };
 };

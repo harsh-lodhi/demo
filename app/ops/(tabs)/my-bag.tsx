@@ -1,18 +1,14 @@
+import { ProductItemType, WarehouseItemType } from "atoms/app";
+import { useProductsState, useWarehousesState } from "hooks/appState";
+import { useUser } from "hooks/useUserInfo";
 import { useCallback, useMemo, useState } from "react";
-import { Button, List, Menu, Text } from "react-native-paper";
-import {
-  db,
-  serverTimestamp,
-  updateProductQuantity,
-} from "../../../utils/firebase";
-import { useUser } from "../../../hooks/useUserInfo";
-import { useQuery } from "react-query";
 import { Alert, FlatList, StyleSheet, View } from "react-native";
-import { useProductsState, useWarehousesState } from "../../../hooks/appState";
-import { listToDocsObj } from "../../../utils/common";
-import { ProductItemType, WarehouseItemType } from "../../../atoms/app";
-import { DEFAULT_PRODUCT_IMAGE } from "../../../constants";
-import { formatPrice } from "../../../utils/currency";
+import { Button, List, Menu, Text } from "react-native-paper";
+import { useQuery } from "react-query";
+import { listToDocsObj } from "utils/common";
+import { DEFAULT_PRODUCT_IMAGE } from "utils/constants";
+import { formatPrice } from "utils/currency";
+import { db, serverTimestamp, updateProductQuantity } from "utils/firebase";
 
 const MyBag = () => {
   const [user] = useUser();
@@ -64,10 +60,10 @@ const MyBag = () => {
     });
 
     const WarehouseProductsCol = db.collection(
-      `WarehouseStorage/${selectedWareHouse?._docID || "[__5xx__]"}/products`
+      `WarehouseStorage/${selectedWareHouse?._docID || "[__5xx__]"}/products`,
     );
     const RefillerStorageCol = db.collection(
-      `RefillerStorage/${user?.uid || "[__5xx__]"}/products`
+      `RefillerStorage/${user?.uid || "[__5xx__]"}/products`,
     );
 
     try {
@@ -111,7 +107,7 @@ const MyBag = () => {
           onPress: handleConfirmSubmit,
         },
       ],
-      { cancelable: true }
+      { cancelable: true },
     );
   }, [handleConfirmSubmit]);
 

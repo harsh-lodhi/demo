@@ -1,7 +1,7 @@
 import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
 import { useEffect, useState } from "react";
-import { db } from "../utils/firebase";
-import { Storage } from "../types/common";
+import { Storage } from "types/common";
+import { db } from "utils/firebase";
 
 interface _ProductType {
   product_ref: FirebaseFirestoreTypes.DocumentReference;
@@ -36,7 +36,7 @@ const useStorageProducts = (storages: Props[]) => {
       console.log("Unsubscribing from storage products");
       unsubs.forEach((unsub) => unsub());
     };
-  }, [JSON.stringify(storages)]);
+  }, [storages]);
 
   return products;
 };

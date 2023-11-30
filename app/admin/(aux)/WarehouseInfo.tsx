@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
-import { WarehouseItemType } from "../../../atoms/app";
-import { useWarehousesState } from "../../../hooks/appState";
-import { listToDocsObj } from "../../../utils/common";
+import { WarehouseItemType } from "atoms/app";
 import { Stack } from "expo-router";
+import { useWarehousesState } from "hooks/appState";
+import React, { useMemo } from "react";
+import { listToDocsObj } from "utils/common";
 
 interface WarehouseInfoProps {
   id: string;

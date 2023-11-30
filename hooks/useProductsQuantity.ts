@@ -1,14 +1,15 @@
+import { productsQuantityState } from "atoms/app";
 import { useCallback } from "react";
+import { useQuery } from "react-query";
+import { useRecoilState } from "recoil";
+import { Storage } from "types/common";
+import { fetchProductQuantity } from "utils/storage";
+
 import {
   useTeamMembersState,
   useVendingMachinesState,
   useWarehousesState,
 } from "./appState";
-import { Storage } from "../types/common";
-import { productsQuantityState } from "../atoms/app";
-import { useRecoilState } from "recoil";
-import { useQuery } from "react-query";
-import { fetchProductQuantity } from "../utils/storage";
 
 const useProductsQuantity = () => {
   const [warehouses] = useWarehousesState();
@@ -20,17 +21,17 @@ const useProductsQuantity = () => {
   const fetchAllProductsQuantity = useCallback(async () => {
     const warehousesQuantity = await fetchProductQuantity(
       Storage.WAREHOUSE,
-      warehouses
+      warehouses,
     );
 
     const refillersQuantity = await fetchProductQuantity(
       Storage.REFILLER,
-      refillers.items
+      refillers.items,
     );
 
     const vendingMachinesQuantity = await fetchProductQuantity(
       Storage.VENDING_MACHINE,
-      vendingMachines.items
+      vendingMachines.items,
     );
 
     return {

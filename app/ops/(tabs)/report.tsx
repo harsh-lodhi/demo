@@ -1,11 +1,11 @@
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import ProductPicker from "app/admin/(aux)/ProductPicker";
+import { ProductItemType } from "atoms/app";
+import { useUser } from "hooks/useUserInfo";
+import { useMemo, useState } from "react";
 import { Alert, ScrollView, View } from "react-native";
 import { FAB, List, Text, TextInput, useTheme } from "react-native-paper";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import { useMemo, useState } from "react";
-import ProductPicker from "../../admin/(aux)/ProductPicker";
-import { ProductItemType } from "../../../atoms/app";
-import { db, serverTimestamp } from "../../../utils/firebase";
-import { useUser } from "../../../hooks/useUserInfo";
+import { db, serverTimestamp } from "utils/firebase";
 
 const OpsReport = () => {
   const theme = useTheme();
@@ -57,7 +57,7 @@ const OpsReport = () => {
     if (!formData.vendingMachine) {
       Alert.alert(
         "Vending machine is required",
-        "Please select a vending machine"
+        "Please select a vending machine",
       );
       return;
     }
@@ -65,7 +65,7 @@ const OpsReport = () => {
     if (!formData.tray) {
       Alert.alert(
         "Tray is required",
-        "Please select a tray in the vending machine"
+        "Please select a tray in the vending machine",
       );
       return;
     }
@@ -73,7 +73,7 @@ const OpsReport = () => {
     if (!selectedProduct) {
       Alert.alert(
         "Product is required",
-        "Please select a product in the vending machine"
+        "Please select a product in the vending machine",
       );
       return;
     }
@@ -81,7 +81,7 @@ const OpsReport = () => {
     if (!formData.actualQuantity || isNaN(Number(formData.actualQuantity))) {
       Alert.alert(
         "Actual quantity is required",
-        "Please enter the actual quantity of the product available"
+        "Please enter the actual quantity of the product available",
       );
       return;
     }
@@ -89,7 +89,7 @@ const OpsReport = () => {
     if (!formData.systemQuantity || isNaN(Number(formData.systemQuantity))) {
       Alert.alert(
         "System quantity is required",
-        "Please enter the system quantity of the product available"
+        "Please enter the system quantity of the product available",
       );
       return;
     }
@@ -112,7 +112,7 @@ const OpsReport = () => {
       .then(() => {
         Alert.alert(
           "Report submitted",
-          "Thank you for submitting the report. We will look into it and get back to you."
+          "Thank you for submitting the report. We will look into it and get back to you.",
         );
         setFormData({
           vendingMachine: "",
@@ -123,10 +123,11 @@ const OpsReport = () => {
         });
         setSelectedProduct(undefined);
       })
-      .catch((err) => {
+      .catch((err: any) => {
         Alert.alert(
           "Something went wrong",
-          "Please try again later. If the issue persists, please contact support."
+          err.message ??
+            "Please try again later. If the issue persists, please contact support.",
         );
       })
       .finally(() => {

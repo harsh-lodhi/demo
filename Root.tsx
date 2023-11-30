@@ -1,7 +1,7 @@
 import { App } from "expo-router/_app";
-import { RecoilRoot } from "recoil";
 import { PaperProvider, DefaultTheme } from "react-native-paper";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { RecoilRoot } from "recoil";
 
 const queryClient = new QueryClient();
 

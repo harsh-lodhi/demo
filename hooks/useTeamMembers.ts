@@ -1,10 +1,10 @@
-import { useRecoilState } from "recoil";
-import { TeamMemberItemType, teamMemberState } from "../atoms/app";
+import { wenderApi } from "api";
+import { TeamMemberItemType, teamMemberState } from "atoms/app";
 import { useEffect } from "react";
-import { db } from "../utils/firebase";
 import { useQuery } from "react-query";
-import { wenderApi } from "../api";
-import { DBCollection } from "../types/common";
+import { useRecoilState } from "recoil";
+import { DBCollection } from "types/common";
+import { db } from "utils/firebase";
 
 export const useTeamMembers = () => {
   const [teamMembers, setTeamMembers] = useRecoilState(teamMemberState);
@@ -20,7 +20,7 @@ export const useTeamMembers = () => {
     },
     {
       enabled: teamMembers.shouldRefetch || teamMembers.items.length === 0,
-    }
+    },
   );
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export const useTeamMembers = () => {
           (p: TeamMemberItemType) => ({
             ...p,
             _docID: p.user_id,
-          })
+          }),
         ),
         shouldRefetch: false,
       }));
@@ -45,7 +45,7 @@ export const useTeamMembers = () => {
       });
       batch.commit();
     }
-  }, [teamMembersRes?.data.data.team_members]);
+  }, [setTeamMembers, teamMembersRes]);
 
   return { teamMembers, isLoading, refetch };
 };

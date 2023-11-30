@@ -1,3 +1,8 @@
+import * as Application from "expo-application";
+import { Stack, router } from "expo-router";
+import * as Updates from "expo-updates";
+import { useUser } from "hooks/useUserInfo";
+import { useCallback, useState } from "react";
 import { ToastAndroid, View } from "react-native";
 import {
   Banner,
@@ -8,13 +13,8 @@ import {
   Menu,
   Text,
 } from "react-native-paper";
-import { Stack, router } from "expo-router";
-import { useUser } from "../hooks/useUserInfo";
-import * as Application from "expo-application";
-import { useCallback, useState } from "react";
-import { signOut } from "../utils/auth";
-import * as Updates from "expo-updates";
 import { useQuery } from "react-query";
+import { signOut } from "utils/auth";
 
 const StackScreenOptions = () => {
   const [show, setShow] = useState(false);
@@ -66,7 +66,7 @@ const Home = () => {
     } catch (error: any) {
       ToastAndroid.show(
         error.message ?? "Error applying update. Please try again later.",
-        ToastAndroid.LONG
+        ToastAndroid.LONG,
       );
     } finally {
       setApplyingUpdate(false);
@@ -137,7 +137,7 @@ const Home = () => {
             right={() => <List.Icon icon="chevron-right" />}
           />
 
-          {user?.claims?.role == "admin" && (
+          {user?.claims?.role === "admin" && (
             <>
               <Divider />
               <List.Item

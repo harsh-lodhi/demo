@@ -1,9 +1,9 @@
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { VendingMachineItemType } from "atoms/app";
+import { useVendingMachinesState } from "hooks/appState";
 import { FC, useState, useCallback } from "react";
 import { Modal, FlatList, View, StyleSheet } from "react-native";
 import { Appbar, List, Divider, FAB, Text } from "react-native-paper";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import { VendingMachineItemType } from "../atoms/app";
-import { useVendingMachinesState } from "../hooks/appState";
 
 interface MachinePickerModalProps {
   selectedMachines: VendingMachineItemType[];
@@ -32,7 +32,7 @@ const MachinePickerModal: FC<MachinePickerModalProps> = ({
         }
       });
     },
-    [setSelected]
+    [setSelected],
   );
 
   const handleSubmit = useCallback(() => {

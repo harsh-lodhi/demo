@@ -1,4 +1,5 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+
 import { auth } from "./firebase";
 
 export const signOut = async () => {

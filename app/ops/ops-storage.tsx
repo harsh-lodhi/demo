@@ -1,12 +1,12 @@
+import ManageStorageStock from "app/admin/(aux)/ManageStorageStock";
+import { StorageInfo } from "app/admin/storage";
 import { useLocalSearchParams } from "expo-router";
+import React from "react";
 import { View } from "react-native";
 import { Text } from "react-native-paper";
-import { Storage } from "../../types/common";
-import React from "react";
-import { StorageInfo } from "../admin/storage";
-import ManageStorageStock from "../admin/(aux)/ManageStorageStock";
+import { Storage } from "types/common";
 
-const storage = () => {
+const OpsStorageScreen = () => {
   const params = useLocalSearchParams<{
     storageName: Storage;
     storageLabel: string;
@@ -37,4 +37,4 @@ const storage = () => {
   );
 };
 
-export default storage;
+export default OpsStorageScreen;

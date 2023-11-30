@@ -1,11 +1,11 @@
-import { FlatList, Image, View } from "react-native";
-import { Divider, List, Text } from "react-native-paper";
-import { useTeamMembersState } from "../../../hooks/appState";
+import { TeamMemberItemType } from "atoms/app";
 import { router } from "expo-router";
+import { useTeamMembersState } from "hooks/appState";
 import { useCallback } from "react";
-import { TeamMemberItemType } from "../../../atoms/app";
-import { Storage } from "../../../types/common";
-import { DEFAULT_PRODUCT_IMAGE } from "../../../constants";
+import { FlatList, Image } from "react-native";
+import { Divider, List, Text } from "react-native-paper";
+import { Storage } from "types/common";
+import { DEFAULT_PRODUCT_IMAGE } from "utils/constants";
 
 const RefillerScreen = () => {
   const [teamMembers] = useTeamMembersState();
