@@ -7,7 +7,7 @@
     "scheme": "gg-app",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "owner": "hamidlab",
+    "owner": "go-grab",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -36,7 +36,7 @@
     },
     "plugins": [
       "expo-router",
-      ["expo-updates", { "username": "hamidlab" }],
+      ["expo-updates", { "username": "go-grab" }],
       "@react-native-firebase/app",
       "@react-native-firebase/perf",
       "@react-native-firebase/crashlytics",
