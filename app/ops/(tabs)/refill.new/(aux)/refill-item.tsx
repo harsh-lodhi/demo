@@ -1,7 +1,7 @@
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { ProductItem } from "app/(aux)/picker/ProductQuantityDialog";
 import { FC, memo, useCallback, useRef } from "react";
-import { Alert, View } from "react-native";
+import { Alert, View, ViewStyle } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import {
   List,
@@ -40,15 +40,25 @@ const StepperInput: FC<StepperInputProps> = ({
   }, [min, onChange, value]);
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 4,
+      }}
+    >
       <InputButton onPress={handleDecrement} icon="minus" />
       <View
         style={{
           backgroundColor: "#f1f1f1",
           width: 64,
-          height: 32,
+          height: 48,
           paddingHorizontal: 8,
           paddingVertical: 4,
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <Text style={{ textAlign: "center" }}>
@@ -63,17 +73,21 @@ const StepperInput: FC<StepperInputProps> = ({
 interface InputButtonProps {
   onPress: () => void;
   icon: string;
+  style?: ViewStyle;
 }
 
-const InputButton: FC<InputButtonProps> = ({ onPress, icon }) => {
+const InputButton: FC<InputButtonProps> = ({ onPress, icon, style }) => {
   return (
     <TouchableRipple
-      style={{
-        height: 32,
-        width: 32,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      style={[
+        {
+          height: 48,
+          width: 48,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        style,
+      ]}
       onPress={onPress}
     >
       <List.Icon icon={icon} />
@@ -120,38 +134,41 @@ const RefillItem: FC<RefillItemProps> = memo(
       );
     }, [handleQuantityChange, item.product_name]);
 
+    const renderRightActions = useCallback(() => {
+      return (
+        <>
+          <TouchableRipple
+            style={{
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: theme.colors.onErrorContainer,
+              paddingHorizontal: 16,
+            }}
+            onPress={handleEmpty}
+          >
+            <>
+              <List.Icon icon="delete-empty" color={theme.colors.onError} />
+              <Text
+                style={{
+                  paddingVertical: 4,
+                  paddingHorizontal: 8,
+                  color: theme.colors.onError,
+                }}
+              >
+                Empty
+              </Text>
+            </>
+          </TouchableRipple>
+        </>
+      );
+    }, [handleEmpty, theme.colors.onError, theme.colors.onErrorContainer]);
+
     return (
       <Swipeable
         useNativeAnimations
         ref={swipeableRef}
-        renderRightActions={() => {
-          return (
-            <>
-              <TouchableRipple
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: theme.colors.onErrorContainer,
-                  paddingHorizontal: 16,
-                }}
-                onPress={handleEmpty}
-              >
-                <>
-                  <List.Icon icon="delete-empty" color={theme.colors.onError} />
-                  <Text
-                    style={{
-                      paddingVertical: 4,
-                      paddingHorizontal: 8,
-                      color: theme.colors.onError,
-                    }}
-                  >
-                    Empty
-                  </Text>
-                </>
-              </TouchableRipple>
-            </>
-          );
-        }}
+        renderRightActions={renderRightActions}
+        containerStyle={{ height: 158 }}
       >
         <View
           style={{
@@ -160,77 +177,79 @@ const RefillItem: FC<RefillItemProps> = memo(
             paddingHorizontal: 8,
           }}
         >
-          <View style={{ backgroundColor: "#ffffff" }}>
-            <View
-              style={{
-                padding: 16,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                gap: 8,
-              }}
-            >
-              <View>
-                <Text style={{ fontSize: 24, color: "#00000080" }}>
-                  {item.show_pos}
-                </Text>
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                  {item.product_name}
-                </Text>
-                <Text>{formatPrice(item.product_price)}</Text>
-              </View>
+          <View
+            style={{
+              padding: 16,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              gap: 8,
+              backgroundColor: "#ffffff",
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 24, color: "#00000080" }}>
+                {item.show_pos}
+              </Text>
+              <Text
+                style={{ fontSize: 16, fontWeight: "bold" }}
+                numberOfLines={1}
+              >
+                {item.product_name}
+              </Text>
+              <Text>{formatPrice(item.product_price)}</Text>
 
-              <View style={{ gap: 16 }}>
-                <StepperInput
-                  value={item.left_units.toString()}
-                  onChange={handleQuantityChange}
-                  min={0}
-                  max={item.total_units}
-                />
-
-                <TouchableRipple
-                  onPress={() => {
-                    handleQuantityChange(item.total_units.toString());
-                  }}
-                >
-                  <Text
-                    variant="labelLarge"
-                    style={{
-                      textAlign: "center",
-                      borderWidth: 1,
-                      borderColor: "#ccc",
-                      padding: 4,
-                      borderRadius: 4,
-                    }}
-                  >
-                    Full
-                  </Text>
-                </TouchableRipple>
-              </View>
+              <TouchableRipple
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  alignSelf: "flex-start",
+                  marginTop: 16,
+                  flexDirection: "row",
+                  gap: 8,
+                }}
+                onPress={() => {
+                  swipeableRef.current?.close();
+                  onPressEdit(item);
+                }}
+              >
+                <>
+                  <Icon
+                    name="pencil-box-outline"
+                    size={24}
+                    color={theme.colors.primary}
+                  />
+                </>
+              </TouchableRipple>
             </View>
 
-            <TouchableRipple
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                alignSelf: "flex-start",
-                marginHorizontal: 16,
-                marginBottom: 16,
-                flexDirection: "row",
-                gap: 8,
-              }}
-              onPress={() => {
-                swipeableRef.current?.close();
-                onPressEdit(item);
-              }}
-            >
-              <>
-                <Icon
-                  name="pencil-box-outline"
-                  size={24}
-                  color={theme.colors.primary}
-                />
-              </>
-            </TouchableRipple>
+            <View style={{ gap: 16 }}>
+              <StepperInput
+                value={item.left_units.toString()}
+                onChange={handleQuantityChange}
+                min={0}
+                max={item.total_units}
+              />
+
+              <TouchableRipple
+                onPress={() => {
+                  handleQuantityChange(item.total_units.toString());
+                }}
+              >
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    textAlign: "center",
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    padding: 4,
+                    borderRadius: 4,
+                    paddingVertical: 8,
+                  }}
+                >
+                  Full
+                </Text>
+              </TouchableRipple>
+            </View>
           </View>
 
           <ProgressBar

@@ -72,6 +72,7 @@ const OpsLayout = () => {
         name="refill"
         options={{
           // headerShown: false,
+          href: null,
           title: "Refill",
           tabBarLabel: "Refill",
           tabBarIcon: ({ color, size }) => (

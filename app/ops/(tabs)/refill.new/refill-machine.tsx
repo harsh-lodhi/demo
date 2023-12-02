@@ -6,8 +6,8 @@ import { ProductItemType } from "atoms/app";
 import Loader from "components/Loader/Loader";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { FC, useCallback, useRef, useState } from "react";
-import { Alert, FlatList, SectionList, View } from "react-native";
-import { Button, Text, TouchableRipple } from "react-native-paper";
+import { Alert, SectionList, SectionListData, View } from "react-native";
+import { Button, Text } from "react-native-paper";
 import { useQuery } from "react-query";
 
 interface RefillMachineScreenProps {
@@ -120,10 +120,19 @@ const RefillMachineScreen = () => {
         warehouse_id: "",
       });
 
-      Alert.alert("Success", "Machine has been refilled successfully.");
-
-      // Goback
-      router.back();
+      Alert.alert(
+        "Success",
+        "Machine has been refilled successfully.",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              router.back();
+            },
+          },
+        ],
+        { cancelable: false },
+      );
     } catch (error: any) {
       Alert.alert(
         "Error",
@@ -133,30 +142,97 @@ const RefillMachineScreen = () => {
     } finally {
       setSubmitting(false);
     }
-
-    console.log(JSON.stringify(allItems, null, 2));
-    console.log("totalAmount", totalAmount);
-    console.log("changedItems", JSON.stringify(changedItems, null, 2));
   }, [changedItems, data, params.machine_id, router]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: ProductItem }) => (
+      <RefillItem
+        item={changedItems[item.pos] || item}
+        onChange={handleItemChange}
+        onPressEdit={setItemToEdit}
+      />
+    ),
+    [changedItems, handleItemChange],
+  );
+
+  const renderSectionHeader = useCallback(
+    ({ section: { title } }: { section: SectionListData<ProductItem> }) => {
+      return (
+        <View
+          style={{
+            backgroundColor: "#f1f1f1",
+            padding: 16,
+            elevation: 2,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            variant="labelLarge"
+            style={{
+              backgroundColor: "#333",
+              color: "#ffffff",
+              paddingHorizontal: 16,
+              paddingVertical: 4,
+              borderRadius: 4,
+              alignSelf: "flex-start",
+            }}
+          >
+            Tray {title}
+          </Text>
+        </View>
+      );
+    },
+    [],
+  );
+
+  // const getItemLayout = useCallback(
+  //   (data: SectionListData<ProductItem>[] | null, index: number) => {
+  //     return { length: 160, offset: 160 * index, index };
+  //   },
+  //   [],
+  // );
 
   return (
     <>
       <ScreenOptions onSubmit={handleSubmit} />
       <Loader visible={isLoading || submitting} />
 
-      <FlatList
-        horizontal
-        data={data}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item, index }) => (
+      <SectionList
+        ref={sectionList}
+        stickySectionHeadersEnabled
+        sections={data}
+        windowSize={6}
+        // getItemLayout={getItemLayout}
+        keyExtractor={(item) => item.pos}
+        renderItem={renderItem}
+        renderSectionHeader={renderSectionHeader}
+        ListFooterComponent={
+          <View style={{ backgroundColor: "#f1f1f1", padding: 16 }}>
+            <Text style={{ textAlign: "center" }}>[End]</Text>
+          </View>
+        }
+      />
+
+      {/* <View
+        style={{
+          flexDirection: "row",
+          padding: 2,
+          backgroundColor: "#fff",
+          gap: 2,
+        }}
+      >
+        {data.map((v, i) => (
           <TouchableRipple
+            key={v.title}
             onPress={() => {
               sectionList.current?.scrollToLocation({
-                sectionIndex: index,
+                sectionIndex: i,
                 itemIndex: 1,
               });
             }}
-            style={{ backgroundColor: "#0bbf64" }}
+            style={{ backgroundColor: "#0bbf64", flex: 1 }}
           >
             <View style={{ padding: 4 }}>
               <Text
@@ -164,83 +240,16 @@ const RefillMachineScreen = () => {
                   paddingHorizontal: 16,
                   paddingVertical: 4,
                   borderRadius: 4,
+                  textAlign: "center",
+                  color: "white",
                 }}
               >
-                {item.title}
+                {v.title}
               </Text>
             </View>
           </TouchableRipple>
-        )}
-        keyExtractor={(item) => item.title}
-        ItemSeparatorComponent={() => <View style={{ width: 2 }} />}
-        ListHeaderComponent={() => (
-          <View
-            style={{
-              paddingHorizontal: 8,
-              height: 33,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text>Tray</Text>
-          </View>
-        )}
-        contentContainerStyle={{
-          padding: 4,
-        }}
-      />
-
-      <SectionList
-        ref={sectionList}
-        stickySectionHeadersEnabled
-        sections={data}
-        windowSize={6}
-        // getItemLayout={(data, index) => {
-        //   console.log(data?.[index]);
-
-        //   return {
-        //     length: 80,
-        //     offset: 80 * index,
-        //     index,
-        //   };
-        // }}
-        keyExtractor={(item) => item.pos}
-        renderItem={({ item }) => (
-          <RefillItem
-            item={changedItems[item.pos] || item}
-            onChange={handleItemChange}
-            onPressEdit={setItemToEdit}
-          />
-        )}
-        renderSectionHeader={({ section: { title } }) => {
-          return (
-            <View
-              style={{
-                backgroundColor: "#f1f1f1",
-                padding: 16,
-                elevation: 2,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                variant="labelLarge"
-                style={{
-                  backgroundColor: "#333",
-                  color: "#ffffff",
-                  paddingHorizontal: 16,
-                  paddingVertical: 4,
-                  borderRadius: 4,
-                  alignSelf: "flex-start",
-                }}
-              >
-                Tray {title}
-              </Text>
-            </View>
-          );
-        }}
-      />
+        ))}
+      </View> */}
 
       <ProductPicker
         visible={!!itemToEdit}
