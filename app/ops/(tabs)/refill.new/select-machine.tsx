@@ -1,11 +1,10 @@
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { VendingMachineItemType } from "atoms/app";
 import { Stack, useRouter } from "expo-router";
+import { useVendingMachinesState } from "hooks/appState";
 import { useCallback } from "react";
 import { FlatList, View } from "react-native";
 import { Divider, List, Text } from "react-native-paper";
-
-import { VendingMachineItemType } from "../../../../atoms/app";
-import { useVendingMachinesState } from "../../../../hooks/appState";
 
 const ScreenOptions = () => {
   return <Stack.Screen options={{ title: "Select machine" }} />;

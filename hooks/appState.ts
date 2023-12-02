@@ -1,5 +1,3 @@
-import { useRecoilState } from "recoil";
-
 import {
   categoriesState,
   productsQuantityState,
@@ -7,7 +5,8 @@ import {
   teamMemberState,
   vendingMachinesState,
   warehousesState,
-} from "../atoms/app";
+} from "atoms/app";
+import { useRecoilState } from "recoil";
 
 export const useProductsState = () => {
   return useRecoilState(productsState);

@@ -1,11 +1,10 @@
+import { WarehouseItemType } from "atoms/app";
 import { router } from "expo-router";
+import { useWarehousesState } from "hooks/appState";
 import { useCallback } from "react";
 import { FlatList } from "react-native";
 import { Divider, List, Text } from "react-native-paper";
-
-import { WarehouseItemType } from "../../../atoms/app";
-import { useWarehousesState } from "../../../hooks/appState";
-import { Storage } from "../../../types/common";
+import { Storage } from "types/common";
 
 const WarehouseOpsScreen = () => {
   const [warehouses] = useWarehousesState();

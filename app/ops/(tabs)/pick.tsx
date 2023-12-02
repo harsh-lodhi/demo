@@ -1,27 +1,26 @@
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import React, { useCallback, useMemo, useState } from "react";
-import { Alert, FlatList, SectionList, StyleSheet, View } from "react-native";
-import { Button, Chip, FAB, List, Menu, Text } from "react-native-paper";
-import { useQuery } from "react-query";
-
+import { api, wenderApi } from "api";
 import ProductQuantityDialog, {
   ProductItem,
-} from "../../(aux)/picker/ProductQuantityDialog";
-import { api, wenderApi } from "../../../api";
+} from "app/(aux)/picker/ProductQuantityDialog";
+import ProductPicker from "app/admin/(aux)/ProductPicker";
 import {
   ProductItemType,
   VendingMachineItemType,
   WarehouseItemType,
-} from "../../../atoms/app";
-import MachinePickerModal from "../../../components/MachinePickerModal";
+} from "atoms/app";
+import MachinePickerModal from "components/MachinePickerModal";
 import {
   useCategoriesState,
   useProductsState,
   useWarehousesState,
-} from "../../../hooks/appState";
-import { useUser } from "../../../hooks/useUserInfo";
-import { db, serverTimestamp } from "../../../utils/firebase";
-import ProductPicker from "../../admin/(aux)/ProductPicker";
+} from "hooks/appState";
+import { useUser } from "hooks/useUserInfo";
+import React, { useCallback, useMemo, useState } from "react";
+import { Alert, FlatList, SectionList, StyleSheet, View } from "react-native";
+import { Button, Chip, FAB, List, Menu, Text } from "react-native-paper";
+import { useQuery } from "react-query";
+import { db, serverTimestamp } from "utils/firebase";
 
 interface ProductItemProps {
   item: ProductItem;

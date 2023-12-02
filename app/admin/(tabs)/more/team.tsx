@@ -1,4 +1,5 @@
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import { functionApi } from "api";
 import { useCallback, useMemo, useState } from "react";
 import { Alert, FlatList, View } from "react-native";
 import {
@@ -13,8 +14,6 @@ import {
   TextInput,
 } from "react-native-paper";
 import { useQuery } from "react-query";
-
-import { functionApi } from "../../../../api";
 
 interface CustomClaimsType {
   role?: "admin";
