@@ -1,4 +1,6 @@
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+// require('dotenv').config();
+import {NEW_RELIC_LICENSE_KEY} from "@env"
 import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore";
 import { ProductItemType } from "atoms/app";
 import { Tabs } from "expo-router";
@@ -24,9 +26,13 @@ import { db, increment } from "utils/firebase";
 
 import ProductPicker from "./ProductPicker";
 
+
+
 interface _ProductType {
   product_ref: FirebaseFirestoreTypes.DocumentReference;
   quantity: number;
+  title: string;
+  price: number;
 }
 
 interface StorageProductsFormProps {
@@ -35,7 +41,7 @@ interface StorageProductsFormProps {
   storageLabel?: string;
   ops?: boolean;
 }
-
+// const newRelicLicenseKey = process.env.NEW_RELIC_LICENSE_KEY;
 const ManageStorageStock: FC<StorageProductsFormProps> = ({
   id,
   storageName,
@@ -48,34 +54,90 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
   const [selectedProduct, setSelectedProduct] = useState<{
     id: string;
     quantity: string;
+    title: string;
+    price: number
   }>();
 
   const [savingProduct, setSavingProduct] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [newQuantityChange, setNewQuantityChange] = useState("");
+  const allProductsObj: {
+    [key: string]: ProductItemType;  
+  } = useMemo(() => {
+    return listToDocsObj(allProducts);
+  }, [allProducts]);
 
   useEffect(() => {
     const unsubs = db
       .collection(`${storageName}/${id}/products`)
-      .onSnapshot((snapshot) => {
+      .onSnapshot(async (snapshot) => {
         const products: _ProductType[] = [];
-        snapshot.forEach((doc) => {
-          products.push(doc.data() as _ProductType);
-        });
+  
+        // Fetch product data for each document concurrently
+        await Promise.all(snapshot.docs.map(async (doc) => {
+          const productData = doc.data() as _ProductType;
+          const title = allProductsObj[productData.product_ref.id]?.product_name || "Unknown";
+          const price = allProductsObj[productData.product_ref.id]?.product_price || 0;
+          products.push({ ...productData, title, price }); // Add productName to the product object
+        }));
+        
+  
         setProducts(products.sort((a, b) => b.quantity - a.quantity));
+  
+        // Prepare the data to send to New Relic
+        const events = products.map(product => ({
+          eventType: storageLabel || 'Unknown',
+          productName: product.title,
+          quantity: product.quantity,
+          price: product.price
+        }));
+        
+        // Now you can send events to New Relic
+        sendEventsToNewRelic(events);
       });
+  
+  
+        
+  
+  const sendEventsToNewRelic = async (events:any) => {
+    // console.log(products)
+    products.forEach(product => {
+      console.log( allProductsObj[product.product_ref.id].product_name , "-", product.price);
+    });
+    
+    try {
+      const res = await fetch(
+        'https://insights-collector.newrelic.com/v1/accounts/4142841/events',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Api-Key': NEW_RELIC_LICENSE_KEY || '',
+          },
+          body: JSON.stringify(events),
+        }
+      );
 
+      if (res.ok) {
+        console.log('Data sent to New Relic successfully');
+      } else {
+        console.error('Failed to send data to New Relic:', res.status);
+      }
+    } catch (error) {
+      console.error('Error sending data to New Relic:', error instanceof Error ? error.message : error);
+    }
+    
+  };
+  
     return () => {
       unsubs();
     };
   }, [id, storageName]);
 
-  const allProductsObj: {
-    [key: string]: ProductItemType;
-  } = useMemo(() => {
-    return listToDocsObj(allProducts);
-  }, [allProducts]);
+
+
+  
 
   const productsObj = useMemo(() => {
     return listToDocsObj(products);
@@ -106,26 +168,14 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
     (product_id: string) => {
       setSelectedProduct({
         id: product_id,
-        quantity: `${productsObj[product_id]?.quantity || ""}`,
+        quantity: productsObj[product_id]?.quantity || 0, // Assign default value of 0 if quantity is not available
+        title: productsObj[product_id]?.product_name || "",
+        price: productsObj[product_id]?.product_price || 0,
       });
       setModalVisible(false);
     },
     [productsObj],
   );
-
-  // const handleAddProduct = useCallback(async () => {
-  //   if (!selectedProduct) return;
-  //   setSavingProduct(true);
-  //   await db
-  //     .collection(`${storageName}/${id}/products`)
-  //     .doc(selectedProduct.id)
-  //     .set({
-  //       product_ref: db.doc(`Products/${selectedProduct.id}`),
-  //       quantity: parseInt(selectedProduct.quantity),
-  //     });
-  //   setSelectedProduct(undefined);
-  //   setSavingProduct(false);
-  // }, [selectedProduct, storageName]);
 
   const handleSetProduct = useCallback(
     async (inc: boolean) => {
@@ -159,6 +209,7 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
     },
     [newQuantityChange, selectedProduct, storageName, id],
   );
+  
 
   return (
     <>
@@ -259,6 +310,8 @@ const ManageStorageStock: FC<StorageProductsFormProps> = ({
                       setSelectedProduct({
                         id: item.product_ref.id,
                         quantity: `${item.quantity}`,
+                        title: _p.product_name,
+                        price: _p.product_price
                       });
                     }
               }

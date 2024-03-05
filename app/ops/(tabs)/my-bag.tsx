@@ -62,6 +62,7 @@ const MyBag = () => {
     const WarehouseProductsCol = db.collection(
       `WarehouseStorage/${selectedWareHouse?._docID || "[__5xx__]"}/products`,
     );
+    console.log(WarehouseProductsCol);
     const RefillerStorageCol = db.collection(
       `RefillerStorage/${user?.uid || "[__5xx__]"}/products`,
     );

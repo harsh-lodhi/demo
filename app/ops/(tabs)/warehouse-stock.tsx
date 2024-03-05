@@ -10,6 +10,7 @@ const WarehouseOpsScreen = () => {
   const [warehouses] = useWarehousesState();
 
   const handleItemPress = useCallback((item: WarehouseItemType) => {
+    // console.log(item);
     router.push({
       pathname: "/ops/ops-storage",
       params: {
@@ -25,6 +26,7 @@ const WarehouseOpsScreen = () => {
       <Text variant="labelLarge" style={{ padding: 16 }}>
         Select warehouse
       </Text>
+      
       <FlatList
         data={warehouses}
         renderItem={({ item }) => (
